@@ -19,3 +19,22 @@ Clone the repository:
 ```bash
 git clone https://github.com/yourusername/FQkit.git
 cd FQkit
+
+
+
+from fqkit.core.circuit import QuantumCircuit
+from fqkit.core.gate import Hadamard, CNOT
+from fqkit.core.parameter import Parameter
+from fqkit.core.parameter_binding import bind_parameters
+from fqkit.core.simulator import run
+from fqkit.core.measurement import measure_all
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0,1])
+
+state = run(qc)
+counts = measure_all(state, shots=1024)
+print("State:", state)
+print("Counts:", counts)
+
