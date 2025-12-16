@@ -17,7 +17,7 @@
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/FQkit.git
+git clone https://github.com/Felixowusu20/Fqkit.git
 cd FQkit
 
 
