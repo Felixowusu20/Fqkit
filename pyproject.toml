@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fqkit"
+version = "0.1.0"
+description = "A lightweight Python framework for building and simulating quantum circuits."
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["quantum", "quantum-computing", "simulator", "education", "qiskit"]
+classifiers = [
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.21",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Felixowusu20/Fqkit"
+
+[tool.setuptools.packages.find]
+include = ["fqkit*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
