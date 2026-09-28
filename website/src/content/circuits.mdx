@@ -1,0 +1,61 @@
+---
+title: Circuits
+description: Build circuits with QuantumCircuit.
+---
+
+# Circuits
+
+A `QuantumCircuit` holds a number of qubits and an ordered list of operations
+(gates applied to specific qubits).
+
+## Create a circuit
+
+```python
+from fqkit import QuantumCircuit
+
+qc = QuantumCircuit(3)        # a 3-qubit circuit
+print(qc.num_qubits)          # 3
+```
+
+## Add gates
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, Qubit
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+```
+
+Targets can be integer indices or `Qubit` objects — both work:
+
+```python
+qc.add_gate(Hadamard(), [Qubit(0)])
+```
+
+## Validation
+
+`add_gate` checks your circuit and raises a clear `ValueError` if:
+
+- the number of targets doesn't match the gate's qubit count
+- a target index is negative or beyond the circuit size
+- a multi-qubit gate targets the same qubit twice
+
+```python
+qc = QuantumCircuit(2)
+qc.add_gate(CNOT(), [0])       # ValueError: needs 2 qubits
+qc.add_gate(Hadamard(), [5])   # ValueError: index exceeds circuit size
+qc.add_gate(CNOT(), [0, 0])    # ValueError: repeated target qubit
+```
+
+## Inspect a circuit
+
+`print(qc)` shows every operation:
+
+```python
+print(qc)
+# QuantumCircuit(2, [
+# H on (0)
+# CNOT on (0, 1)
+# ])
+```

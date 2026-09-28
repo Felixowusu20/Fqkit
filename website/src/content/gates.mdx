@@ -1,0 +1,66 @@
+---
+title: Gates
+description: The FQkit gate library.
+---
+
+# Gates
+
+A gate is a unitary operation applied to one or more qubits. FQkit provides a
+`Gate` base class plus ready-made factories for the common gates.
+
+## Single-qubit gates
+
+| Gate | Call | Parameterized | Description |
+| --- | --- | --- | --- |
+| Hadamard | `Hadamard()` | no | Creates superposition |
+| RX | `RX(theta)` | yes | Rotation about the X axis |
+| RY | `RY(theta)` | yes | Rotation about the Y axis |
+| RZ | `RZ(theta)` | yes | Rotation about the Z axis |
+
+## Multi-qubit gates
+
+| Gate | Call | Qubits | Description |
+| --- | --- | --- | --- |
+| CNOT | `CNOT()` | 2 | Controlled-NOT (control, target) |
+| CZ | `CZ()` | 2 | Controlled-Z |
+| SWAP | `SWAP()` | 2 | Swaps two qubits |
+| Toffoli | `Toffoli()` | 3 | Controlled-controlled-NOT |
+
+## Using a gate
+
+Gates are added to a circuit with `add_gate(gate, targets)`. The first target
+qubit is the gate's most significant qubit — for `CNOT`, the control.
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, SWAP
+
+qc = QuantumCircuit(3)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])      # control=0, target=1
+qc.add_gate(SWAP(), [1, 2])
+```
+
+## Parameterized gates
+
+Rotation gates take an angle in radians. Pass a number directly, or a symbolic
+[`Parameter`](/docs/parameters) to bind later:
+
+```python
+from fqkit import RX, Parameter
+
+qc.add_gate(RX(1.5708), [0])          # numeric angle
+
+theta = Parameter("theta")
+qc.add_gate(RX(theta), [0])           # symbolic — bind before running
+```
+
+## Custom gates
+
+You can build any gate from its unitary matrix:
+
+```python
+from fqkit import Gate
+
+# A single-qubit identity gate
+my_gate = Gate("I", 1, matrix=[[1, 0], [0, 1]])
+```

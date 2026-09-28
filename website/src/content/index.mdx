@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: What FQkit is and why it exists.
+---
+
+# Introduction
+
+**FQkit** is a lightweight Python framework for building and simulating quantum
+circuits. It is designed to be readable and approachable, so beginner quantum
+enthusiasts — in Africa and around the world — can learn how a quantum computer
+works by reading and hacking on the source.
+
+<Callout type="info">
+  FQkit is free and open source. It depends only on Python and NumPy, and it can
+  export circuits to OpenQASM so you can run them on real IBM quantum hardware
+  through the free tier.
+</Callout>
+
+## Why FQkit?
+
+Most quantum frameworks are large and abstract. FQkit is deliberately small:
+every concept — qubits, gates, operations, circuits, simulation, measurement —
+lives in its own short, readable module. You can hold the whole thing in your
+head.
+
+## Features
+
+- **Qubits and parameterized gates** — `H`, `RX`, `RY`, `RZ`
+- **Multi-qubit gates** — `CNOT`, `CZ`, `SWAP`, `Toffoli`
+- **Circuit construction** — `QuantumCircuit` with validation
+- **Parameter binding** — symbolic parameters for variational circuits
+- **Statevector simulator** — `run` returns the final quantum state
+- **Measurement** — `measure_all` samples bitstrings from the state
+- **OpenQASM 2.0 export** — `to_qasm` bridges to Qiskit and real hardware
+
+## How these docs are organized
+
+| Page | What you'll learn |
+| --- | --- |
+| [Installation](/docs/installation) | Getting FQkit onto your machine |
+| [Quick Start](/docs/quick-start) | Your first entangled circuit |
+| [Gates](/docs/gates) | The gate library and how gates work |
+| [Circuits](/docs/circuits) | Building circuits with `QuantumCircuit` |
+| [Simulation & Measurement](/docs/simulation-and-measurement) | Running circuits and reading results |
+| [Parameters & Binding](/docs/parameters) | Variational circuits |
+| [OpenQASM & Hardware](/docs/openqasm) | Exporting to Qiskit and real QPUs |
+| [API Reference](/docs/api) | Every public function and class |

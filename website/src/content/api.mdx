@@ -1,0 +1,86 @@
+---
+title: API Reference
+description: Every public function and class in FQkit.
+---
+
+# API Reference
+
+Everything below is importable from the top level:
+
+```python
+from fqkit import (
+    QuantumCircuit, Qubit, Parameter, Gate,
+    Hadamard, RX, RY, RZ, CNOT, CZ, SWAP, Toffoli,
+    bind_parameters, run, apply_gate, measure_all, to_qasm,
+)
+```
+
+## QuantumCircuit
+
+```python
+QuantumCircuit(num_qubits: int)
+```
+
+- `.num_qubits` — number of qubits
+- `.qubits` — list of `Qubit` objects
+- `.operations` — ordered list of `Operation`s
+- `.add_gate(gate, target_qubits)` — append a gate; validates targets
+- `.to_qasm(measure=True)` — export to an OpenQASM 2.0 string
+
+## Gates
+
+Factories return a `Gate`:
+
+| Function | Returns |
+| --- | --- |
+| `Hadamard()` | 1-qubit H gate |
+| `RX(theta)` / `RY(theta)` / `RZ(theta)` | 1-qubit rotation |
+| `CNOT()` / `CZ()` / `SWAP()` | 2-qubit gate |
+| `Toffoli()` | 3-qubit gate |
+
+```python
+Gate(name: str, num_qubits: int, matrix=None, params=None)
+```
+
+## Simulation
+
+```python
+run(circuit) -> np.ndarray
+```
+
+Returns the final statevector (length `2**num_qubits`, complex).
+
+```python
+apply_gate(state, gate_matrix, num_qubits, target_qubits) -> np.ndarray
+```
+
+Low-level helper: applies one gate to a statevector by tensor contraction.
+
+## Measurement
+
+```python
+measure_all(state_vector, shots=1024) -> dict
+```
+
+Samples the statevector and returns a mapping of bitstring to count.
+
+## Parameters
+
+```python
+Parameter(name: str)
+bind_parameters(circuit, param_values: dict)
+```
+
+## OpenQASM
+
+```python
+to_qasm(circuit, measure=True) -> str
+```
+
+Serializes a circuit to OpenQASM 2.0. Raises `ValueError` for unbound
+parameters or gates with no QASM equivalent.
+
+## Other classes
+
+- `Qubit(index)` — a stateless reference to a qubit by index
+- `Operation(gate, target_qubits)` — a gate bound to specific qubits

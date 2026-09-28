@@ -1,0 +1,27 @@
+.fqkit-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fqkit-logo-mark {
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.fqkit-logo-tagline {
+  opacity: 0.6;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Match Nextra's mobile breakpoint: below `md` the nav links + search collapse
+   into the hamburger, so drop the tagline to keep the logo from overflowing. */
+@media (max-width: 767px) {
+  .fqkit-logo-tagline {
+    display: none;
+  }
+}

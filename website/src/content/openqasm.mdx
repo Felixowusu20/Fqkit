@@ -1,0 +1,93 @@
+---
+title: OpenQASM & Hardware
+description: Export circuits to OpenQASM and run them on real quantum hardware.
+---
+
+# OpenQASM & Hardware
+
+FQkit can export any circuit to **OpenQASM 2.0**, the open standard that Qiskit
+reads. This means a circuit you design in FQkit can run on a **real quantum
+computer** through IBM Quantum's free tier — no hardware of your own needed.
+
+<Callout>
+  This entire pipeline — OpenQASM, Qiskit, and the IBM free tier — costs nothing.
+</Callout>
+
+## Export a circuit
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+
+print(qc.to_qasm())
+```
+
+```text
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[2];
+creg c[2];
+h q[0];
+cx q[0], q[1];
+measure q -> c;
+```
+
+Pass `measure=False` to export the unitary part only (no measurement):
+
+```python
+qc.to_qasm(measure=False)
+```
+
+## Gate mapping
+
+| FQkit | OpenQASM |
+| --- | --- |
+| `Hadamard` | `h` |
+| `CNOT` | `cx` |
+| `CZ` | `cz` |
+| `SWAP` | `swap` |
+| `Toffoli` | `ccx` |
+| `RX` / `RY` / `RZ` | `rx` / `ry` / `rz` |
+
+Parameters must be bound to numbers before exporting.
+
+## Run it in Qiskit
+
+Install the free, open-source Qiskit (`pip install qiskit`), then load the
+exported program:
+
+```python
+from qiskit import QuantumCircuit as QiskitCircuit
+from qiskit.quantum_info import Statevector
+
+qiskit_qc = QiskitCircuit.from_qasm_str(qc.to_qasm(measure=False))
+print(Statevector.from_instruction(qiskit_qc).probabilities_dict())
+# {'00': 0.5, '11': 0.5}
+```
+
+FQkit's own simulator and Qiskit produce **identical** statevectors — the round
+trip is verified in the test suite.
+
+## Run on a real IBM backend (free tier)
+
+```python
+# 1. Create a free account at https://quantum.cloud.ibm.com
+# 2. pip install qiskit-ibm-runtime, then save your token once:
+#      from qiskit_ibm_runtime import QiskitRuntimeService
+#      QiskitRuntimeService.save_account(channel="ibm_quantum", token="YOUR_TOKEN")
+# 3. Run on the least-busy real device:
+#      from qiskit import transpile
+#      service = QiskitRuntimeService()
+#      backend = service.least_busy(operational=True, simulator=False)
+#      job = backend.run(transpile(qiskit_qc, backend), shots=1024)
+#      print(job.result().get_counts())
+```
+
+<Callout type="warning">
+  **Bit order:** FQkit treats qubit 0 as the most significant bit, while Qiskit
+  reports measured bitstrings least-significant-bit first. The circuit and its
+  correlations are identical — only the printed string may look reversed.
+</Callout>

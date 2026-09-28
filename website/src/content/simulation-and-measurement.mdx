@@ -1,0 +1,52 @@
+---
+title: Simulation & Measurement
+description: Run circuits and read out results.
+---
+
+# Simulation & Measurement
+
+## Running a circuit
+
+`run(circuit)` simulates the circuit and returns the final **statevector** — a
+complex NumPy array of length `2**num_qubits`.
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, run
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+
+state = run(qc)
+print(state)   # [0.707+0j 0+0j 0+0j 0.707+0j]
+```
+
+The circuit always starts in `|00...0>` and each operation is applied in order.
+
+## How the simulator works
+
+Each gate is applied to the statevector by **tensor contraction**. This is what
+lets multi-qubit gates act on any set of qubits — including non-adjacent or
+reversed ones — correctly.
+
+## Measuring
+
+`measure_all(state, shots)` samples the statevector and returns a dictionary of
+bitstring counts. The probability of each outcome is the squared magnitude of
+its amplitude.
+
+```python
+from fqkit import measure_all
+
+counts = measure_all(state, shots=1024)
+print(counts)   # {'00': 512, '11': 512}
+```
+
+## Bit-order convention
+
+<Callout type="warning">
+  FQkit uses **big-endian** ordering: qubit 0 is the most significant bit of the
+  bitstring. So the bitstring `01` means qubit 0 measured `0` and qubit 1
+  measured `1`. Qiskit uses the opposite (little-endian) convention — see
+  [OpenQASM & Hardware](/docs/openqasm).
+</Callout>
