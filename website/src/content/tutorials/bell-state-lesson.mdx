@@ -1,0 +1,115 @@
+---
+title: 'Lesson: The Bell State'
+description: Learn superposition and entanglement by building a Bell state in fqkit — with code, real output, plain-language explanations and the math.
+---
+
+# Lesson: The Bell State
+
+In this lesson you will create **entanglement** — the famously "spooky"
+connection between qubits — using only two gates, and see exactly why the
+math produces it.
+
+## 1. The idea
+
+A single qubit can be put into **superposition**: a state where it is genuinely
+both `0` and `1` at the same time, until measured. Two qubits can be
+**entangled**: their measurement results are perfectly correlated, no matter
+how far apart they are. The simplest entangled pair is called a **Bell state**.
+
+## 2. The code
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, run, measure_all
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])   # put qubit 0 into superposition
+qc.add_gate(CNOT(), [0, 1])    # copy qubit 0's value onto qubit 1
+
+state = run(qc)
+print("State :", state)
+print("Counts:", measure_all(state, shots=1024))
+```
+
+## 3. The output
+
+```text
+State : [0.70710678+0.j 0.+0.j 0.+0.j 0.70710678+0.j]
+Counts: {'00': 505, '11': 519}
+```
+
+(Your counts will vary a little — they are random samples.)
+
+## 4. The explanation
+
+- The Hadamard gate turns qubit 0 from a definite `0` into a 50/50 mix of `0`
+  and `1`.
+- The CNOT gate flips qubit 1 **only when** qubit 0 is `1`. Because qubit 0 is
+  in a mix, the CNOT links the two qubits together: if qubit 0 is `0`, qubit 1
+  is `0`; if qubit 0 is `1`, qubit 1 is `1`.
+- After the CNOT there are no "01" or "10" possibilities left. Measuring the
+  pair always gives matching bits: `00` or `11`, each about half the time.
+  That perfect correlation *is* entanglement.
+
+## 5. The math
+
+A qubit's state is a vector. The two basis states are:
+
+$$
+|0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \qquad
+|1\rangle = \begin{pmatrix} 0 \\ 1 \end{pmatrix}
+$$
+
+The Hadamard gate is the matrix:
+
+$$
+H = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}
+$$
+
+Applying it to qubit 0 of the two-qubit system $|00\rangle$ gives
+superposition on the first qubit:
+
+$$
+(H \otimes I)\,|00\rangle = \frac{|00\rangle + |10\rangle}{\sqrt{2}}
+$$
+
+Then CNOT (control = qubit 0, target = qubit 1) flips the second qubit only in
+the $|10\rangle$ branch:
+
+$$
+\text{CNOT}\,\frac{|00\rangle + |10\rangle}{\sqrt{2}}
+= \frac{|00\rangle + |11\rangle}{\sqrt{2}}
+$$
+
+That final vector is the Bell state. In fqkit's state-vector (big-endian
+ordering: index = $2q_0 + q_1$) it is:
+
+$$
+\frac{1}{\sqrt{2}} \begin{pmatrix} 1 \\ 0 \\ 0 \\ 1 \end{pmatrix}
+\approx
+\begin{pmatrix} 0.707 \\ 0 \\ 0 \\ 0.707 \end{pmatrix}
+$$
+
+which matches the printed output. The probability of each outcome is the
+squared magnitude of its amplitude:
+
+$$
+P(00) = \left|\tfrac{1}{\sqrt{2}}\right|^2 = 0.5, \qquad
+P(11) = \left|\tfrac{1}{\sqrt{2}}\right|^2 = 0.5, \qquad
+P(01) = P(10) = 0
+$$
+
+<Callout>
+  **Key insight:** entanglement is not a force or a signal — it is simply a
+  joint state that *cannot be written* as one qubit's state times the other's.
+  $\frac{|00\rangle + |11\rangle}{\sqrt{2}}$ has no such factorization, so
+  neither qubit has a definite value on its own.
+</Callout>
+
+## Try it yourself
+
+- Remove the Hadamard and re-run: what state do you get, and why?
+- Swap the CNOT targets (`[1, 0]` instead of `[0, 1]`): which qubit is the
+  control now, and how does the state vector change?
+- Export the circuit with `qc.to_qasm()` and run it on a real IBM quantum
+  computer via the free tier — see
+  [OpenQASM & Hardware](/docs/openqasm).

@@ -5,6 +5,11 @@ circuits. It is designed to be readable and approachable, so beginner quantum
 enthusiasts — in Africa and around the world — can learn how a quantum computer
 works by reading and hacking on the source.
 
+> **Documentation website:** the full docs live in [`website/`](website) — a
+> Next.js + Nextra site. Run it locally with `cd website && npm install && npm
+> run dev`, or deploy it for free on Vercel (see the
+> [website README](website/README.md)).
+
 ## Features
 
 - Qubits and parameterized gates (`H`, `RX`, `RY`, `RZ`)

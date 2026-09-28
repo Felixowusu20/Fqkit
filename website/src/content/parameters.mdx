@@ -1,0 +1,52 @@
+---
+title: Parameters & Binding
+description: Build variational circuits with symbolic parameters.
+---
+
+# Parameters & Binding
+
+A `Parameter` is a symbolic placeholder for a number. Parameters let you build a
+circuit once and try many different angles — the foundation of variational
+algorithms like VQE and QAOA.
+
+## Define and bind
+
+```python
+from fqkit import (
+    QuantumCircuit, Hadamard, RX, Parameter,
+    bind_parameters, run, measure_all
+)
+
+theta = Parameter("theta")
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(RX(theta), [1])
+
+# Bind the symbol to a number
+bind_parameters(qc, {"theta": 3.14159})
+
+counts = measure_all(run(qc), shots=1024)
+print(counts)
+```
+
+`bind_parameters(circuit, values)` walks the circuit and replaces every
+`Parameter` whose name appears in `values` with the given number.
+
+## Unbound parameters
+
+If you run (or export) a circuit that still has an unbound parameter, FQkit
+raises a clear error instead of a confusing one:
+
+```python
+qc = QuantumCircuit(1)
+qc.add_gate(RX(Parameter("theta")), [0])
+run(qc)
+# ValueError: Gate RX has an unbound parameter 'theta'.
+#             Call bind_parameters(circuit, {'theta': value}) ...
+```
+
+<Callout type="info">
+  You can also pass a plain number to a rotation gate (`RX(1.57)`) if you don't
+  need a symbol.
+</Callout>

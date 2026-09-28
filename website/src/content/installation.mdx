@@ -1,0 +1,48 @@
+---
+title: Installation
+description: Install FQkit from source.
+---
+
+# Installation
+
+FQkit is a pure-Python package. Install it from source in editable mode so you
+can read and modify the code as you learn.
+
+## Requirements
+
+- Python 3.9 or newer
+- [NumPy](https://numpy.org) (installed automatically)
+
+## Install
+
+```bash
+git clone https://github.com/Felixowusu20/Fqkit.git
+cd Fqkit
+pip install -e .
+```
+
+To also install the test tooling:
+
+```bash
+pip install -e ".[dev]"
+```
+
+## Verify
+
+```python
+import fqkit
+print(fqkit.__version__)   # 0.1.0
+```
+
+<Callout type="info">
+  Everything here is free. FQkit adds no paid dependencies — just NumPy.
+</Callout>
+
+## Run the tests
+
+```bash
+pytest -v
+```
+
+You should see 29 tests pass, covering every gate, entanglement, parameter
+binding, measurement, and the OpenQASM export.

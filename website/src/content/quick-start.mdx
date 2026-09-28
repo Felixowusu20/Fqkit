@@ -1,0 +1,54 @@
+---
+title: Quick Start
+description: Build and measure your first entangled circuit.
+---
+
+# Quick Start
+
+Let's build a **Bell state** — two qubits entangled so that measuring one
+instantly tells you the other.
+
+## The circuit
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, run, measure_all
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])   # put qubit 0 into superposition
+qc.add_gate(CNOT(), [0, 1])    # entangle qubit 1 with qubit 0
+
+state = run(qc)
+counts = measure_all(state, shots=1024)
+
+print("State :", state)
+print("Counts:", counts)
+```
+
+## What happens
+
+1. `Hadamard()` puts qubit 0 into an equal superposition of `|0>` and `|1>`.
+2. `CNOT()` uses qubit 0 as the control and qubit 1 as the target, so the two
+   qubits become correlated.
+3. `run(qc)` simulates the circuit and returns the final **statevector**.
+4. `measure_all(state, shots=1024)` samples the state 1024 times.
+
+## Output
+
+```python
+State : [0.70710678+0.j 0.+0.j 0.+0.j 0.70710678+0.j]
+Counts: {'00': 512, '11': 512}
+```
+
+The state is `(|00> + |11>) / sqrt(2)`: the circuit only ever produces `00` or
+`11`, never `01` or `10`. That correlation is entanglement.
+
+<Callout>
+  Counts vary slightly between runs because measurement is random — you'll see
+  numbers near 512/512, not exactly.
+</Callout>
+
+## Next steps
+
+- Learn about the [gate library](/docs/gates)
+- Understand [simulation & measurement](/docs/simulation-and-measurement)
+- Export your circuit to [real hardware](/docs/openqasm)
