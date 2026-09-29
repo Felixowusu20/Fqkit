@@ -7,6 +7,9 @@ export default {
   'simulation-and-measurement': 'Simulation & Measurement',
   parameters: 'Parameters & Binding',
   openqasm: 'OpenQASM & Hardware',
+  hardware: 'Hardware',
   api: 'API Reference',
-  tutorials: 'Tutorials'
+  tutorials: 'Tutorials',
+  algorithms: 'Algorithms',
+  applications: 'Applications'
 }

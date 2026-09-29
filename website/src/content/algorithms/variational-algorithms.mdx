@@ -1,0 +1,140 @@
+---
+title: '4. Variational algorithms'
+description: Estimate a ground-state energy with a parameterized circuit, then see how VQE and QAOA extend that loop.
+---
+
+# 4. Variational algorithms
+
+Deutsch, Bernstein-Vazirani, and Grover assume a perfect, deep circuit.
+Devices available now are noisy and shallow. Variational algorithms move the
+difficulty into a classical loop: a short quantum circuit has free angles, a
+measurement scores it, and an ordinary optimizer proposes better angles.
+
+The two named versions are **VQE** (variational quantum eigensolver), for the
+lowest energy of a physical system, and **QAOA** (quantum approximate
+optimization algorithm), for combinatorial problems. Both are the same loop.
+
+## The problem
+
+A Hamiltonian $H$ is a matrix of energies. Its lowest eigenvalue $E_0$ is the
+ground-state energy: the energy of the most stable state. For a molecule, that
+number decides bond lengths and reaction barriers. Computing it exactly for a
+large system is what the classical calculation spends its time on.
+
+The variational principle says you do not need the exact ground state to get
+an upper bound. For any guess $|\psi\rangle$,
+
+<Equation tex="\langle \psi | H | \psi \rangle \ge E_0" />
+
+with equality only at the true ground state. So: propose $|\psi(\theta)\rangle$
+with a circuit, estimate the left-hand side, and change $\theta$ until the
+estimate stops falling.
+
+## The principle
+
+The circuit is a guess, not the answer. The measurement is a score.
+
+On one qubit, take $H = Z$. Its eigenvalues are $+1$ (state $|0\rangle$) and
+$-1$ (state $|1\rangle$), so $E_0 = -1$. A guess prepared by `RY(θ)` has
+
+<Equation tex="\langle Z \rangle = P(0) - P(1) = \cos \theta" />
+
+when the circuit starts from $|0\rangle$. The score is read from the
+probabilities. No new simulator feature is required.
+
+The optimizer's job is to drive $\langle Z \rangle$ down toward $-1$. At
+$\theta = \pi$ the score is $-1$ and the bound is tight: the guess is the
+ground state.
+
+## From the simple case to the harder one
+
+**One qubit, one parameter.** The worked example. You can see the whole curve.
+The minimum is obvious, which is the point of a first example.
+
+**A sum of terms.** A molecular Hamiltonian is not one $Z$. It is a long sum
+of Pauli strings, $H = \sum_k c_k P_k$, with hundreds or thousands of terms
+even for a small molecule. You estimate each $\langle P_k \rangle$ with its
+own measurement setting and add them. The circuit does not change. The number
+of experiments does.
+
+**Many parameters.** A useful guess for a molecule is a layered circuit: a
+block of rotations and CNOTs, repeated. Twenty parameters is a normal small
+instance. The score is a bumpy function of those parameters. Gradient-free
+methods and the parameter-shift rule are how the classical optimizer moves.
+Local minima are the usual failure, not a wrong simulator.
+
+**QAOA, the combinatorial cousin.** Replace the energy with a cost, such as
+the number of violated edges in a scheduling or cutting problem. Alternate two
+layers: a cost layer that phases each bad assignment, and a mixer layer of
+$X$ rotations that proposes new assignments. More layers means a better
+approximation and a deeper circuit. One layer is already the same loop as VQE:
+prepare, score, update the angles.
+
+## A worked example
+
+<Circuit spec="RY pi 0" caption="The one-qubit ansatz at theta = pi, the ground state of Z." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, RY, Parameter, bind_parameters, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def energy(angle):
+    theta = Parameter("theta")
+    qc = QuantumCircuit(1)
+    qc.add_gate(RY(theta), [0])
+    bind_parameters(qc, {"theta": angle})
+    probabilities = np.abs(run(qc)) ** 2
+    return float(probabilities[0] - probabilities[1])   # <Z>
+
+for angle in (0.0, math.pi / 2, math.pi):
+    score = round(energy(angle), 4)
+    print(f"theta = {angle:.4f}   <Z> = {score}")
+```
+
+```text
+theta = 0.0000   <Z> = 1.0
+theta = 1.5708   <Z> = 0.0
+theta = 3.1416   <Z> = -1.0
+```
+
+The ground-state energy is $-1$. The last angle attains it. The first angle is
+the worst possible guess.
+
+## Problems
+
+1. Print $P(0)$ and $P(1)$ next to $\langle Z \rangle$ for $\theta = \pi/3$.
+   Check that the score really is the difference of the probabilities, and
+   that it equals $\cos(\pi/3)$.
+2. Change the ansatz from `RY` to `RX`. At which of the three angles, if any,
+   do you still reach $-1$? Explain using what `RX` does to $|0\rangle$.
+3. Suppose $H = -Z$ instead of $Z$. What is $E_0$, and which of the three
+   angles in the example attains it? You should be able to answer before
+   editing the code.
+
+## Where it is used
+
+These algorithms are research tools. They have published hardware results.
+They are not yet a replacement for a classical chemistry code or a classical
+solver.
+
+- **VQE, chemistry and materials.** The target is a ground-state energy.
+  Demonstrations have covered the hydrogen molecule and a few other very small
+  systems, as a check that the loop can be run on a device. The industrial
+  targets people cite (catalysts, battery electrolytes, drug-like molecules)
+  need more qubits and quieter gates than current machines give. The algorithm
+  is how those calculations are being attempted.
+- **QAOA, combinatorial optimization.** The same loop with a cost instead of a
+  Hamiltonian. Prototype problems include Max-Cut, portfolio selection, and
+  shift scheduling. For those sizes, a classical solver is still faster and
+  exact. QAOA is studied because the circuit shape matches the hardware, and
+  because the approximation can improve as more layers fit.
+- **What "used" should not be taken to mean.** A variational run on a
+  simulator, including the one-qubit example above, is a numerical method. It
+  becomes a quantum-hardware method only when the expectation values are
+  estimated from shots on a device rather than from a state vector.
+
+That closes the algorithm path: one exact query, a hidden string, an
+unstructured search, and a scored circuit you tune.

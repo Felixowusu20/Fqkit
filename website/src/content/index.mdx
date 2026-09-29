@@ -5,33 +5,33 @@ description: What FQkit is and why it exists.
 
 # Introduction
 
-**FQkit** is a lightweight Python framework for building and simulating quantum
-circuits. It is designed to be readable and approachable, so beginner quantum
-enthusiasts — in Africa and around the world — can learn how a quantum computer
-works by reading and hacking on the source.
+**FQkit** is a small Python framework for building and simulating quantum
+circuits. The source stays short on purpose, so you can learn how a quantum
+computer works by reading it and changing it.
 
 <Callout type="info">
   FQkit is free and open source. It depends only on Python and NumPy, and it can
-  export circuits to OpenQASM so you can run them on real IBM quantum hardware
-  through the free tier.
+  export circuits to OpenQASM so you can run them on real hardware. IBM is
+  reached through Qiskit Runtime. IonQ, Rigetti, IQM, and AQT are reached
+  through Amazon Braket. Those SDKs are optional extras.
 </Callout>
 
 ## Why FQkit?
 
-Most quantum frameworks are large and abstract. FQkit is deliberately small:
-every concept — qubits, gates, operations, circuits, simulation, measurement —
-lives in its own short, readable module. You can hold the whole thing in your
-head.
+Most quantum frameworks are large and abstract. FQkit is deliberately small.
+Qubits, gates, operations, circuits, simulation, and measurement each live in
+a short module you can read. You can hold the whole thing in your head.
 
 ## Features
 
-- **Qubits and parameterized gates** — `H`, `RX`, `RY`, `RZ`
-- **Multi-qubit gates** — `CNOT`, `CZ`, `SWAP`, `Toffoli`
-- **Circuit construction** — `QuantumCircuit` with validation
-- **Parameter binding** — symbolic parameters for variational circuits
-- **Statevector simulator** — `run` returns the final quantum state
-- **Measurement** — `measure_all` samples bitstrings from the state
-- **OpenQASM 2.0 export** — `to_qasm` bridges to Qiskit and real hardware
+- **Qubits and parameterized gates**: `H`, `RX`, `RY`, `RZ`
+- **Multi-qubit gates**: `CNOT`, `CZ`, `SWAP`, `Toffoli`
+- **Circuit construction**: `QuantumCircuit` with validation
+- **Parameter binding**: symbolic parameters for variational circuits
+- **Statevector simulator**: `run` returns the final quantum state
+- **Measurement**: `measure_all` samples bitstrings from the state
+- **OpenQASM 2.0 export**: `to_qasm` bridges to Qiskit and real hardware
+- **Hardware jobs**: `submit(qc, "ibm")` or `"ionq"`, `"rigetti"`, `"iqm"`, `"aqt"`
 
 ## How these docs are organized
 
@@ -43,5 +43,7 @@ head.
 | [Circuits](/docs/circuits) | Building circuits with `QuantumCircuit` |
 | [Simulation & Measurement](/docs/simulation-and-measurement) | Running circuits and reading results |
 | [Parameters & Binding](/docs/parameters) | Variational circuits |
-| [OpenQASM & Hardware](/docs/openqasm) | Exporting to Qiskit and real QPUs |
+| [OpenQASM & Hardware](/docs/openqasm) | Exporting a circuit to OpenQASM |
+| [Hardware](/docs/hardware) | Accounts, runtime, job submission, and results |
 | [API Reference](/docs/api) | Every public function and class |
+| [Applications](/docs/applications) | Chemistry, telecommunications, physics, cryptography, and where to go next |

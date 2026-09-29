@@ -5,7 +5,7 @@ description: Build and measure your first entangled circuit.
 
 # Quick Start
 
-Let's build a **Bell state** — two qubits entangled so that measuring one
+Let's build a **Bell state**: two qubits entangled so that measuring one
 instantly tells you the other.
 
 ## The circuit
@@ -23,6 +23,8 @@ counts = measure_all(state, shots=1024)
 print("State :", state)
 print("Counts:", counts)
 ```
+
+<Circuit spec="H 0; CNOT 0 1" caption="The Bell state, drawn. Qubit 0 is the top wire." />
 
 ## What happens
 
@@ -43,7 +45,7 @@ The state is `(|00> + |11>) / sqrt(2)`: the circuit only ever produces `00` or
 `11`, never `01` or `10`. That correlation is entanglement.
 
 <Callout>
-  Counts vary slightly between runs because measurement is random — you'll see
+  Counts vary slightly between runs because measurement is random. You will see
   numbers near 512/512, not exactly.
 </Callout>
 
@@ -51,4 +53,5 @@ The state is `(|00> + |11>) / sqrt(2)`: the circuit only ever produces `00` or
 
 - Learn about the [gate library](/docs/gates)
 - Understand [simulation & measurement](/docs/simulation-and-measurement)
-- Export your circuit to [real hardware](/docs/openqasm)
+- Export your circuit to [OpenQASM](/docs/openqasm)
+- Submit it to a [real machine](/docs/hardware)

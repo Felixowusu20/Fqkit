@@ -1,0 +1,78 @@
+---
+title: '1. Superposition'
+description: Put one qubit into an equal superposition with the Hadamard gate and read the probabilities.
+---
+
+# 1. Superposition
+
+A qubit starts in a definite state, $|0\rangle$. One gate is enough to put it into
+**superposition**: a state with two amplitudes at once. Measurement then returns
+`0` or `1` at random, with probabilities fixed by those amplitudes.
+
+## 1. The idea
+
+The Hadamard gate sends $|0\rangle$ to an equal mixture of $|0\rangle$ and
+$|1\rangle$. Nothing in the circuit prefers one outcome. About half the shots
+are `0` and half are `1`, and the split gets closer to even as you take more
+shots.
+
+<Circuit spec="H 0" caption="One Hadamard puts qubit 0 into superposition." />
+
+## 2. The code
+
+```python
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, run, measure_all
+
+np.set_printoptions(precision=4, suppress=True)
+
+qc = QuantumCircuit(1)
+qc.add_gate(Hadamard(), [0])
+
+state = run(qc)
+print("Amplitudes   :", np.round(state, 4))
+print("Probabilities:", np.round(np.abs(state) ** 2, 4))
+print("Counts       :", measure_all(state, shots=1024))
+```
+
+## 3. The output
+
+```text
+Amplitudes   : [0.7071+0.j 0.7071+0.j]
+Probabilities: [0.5 0.5]
+Counts       : {'0': 509, '1': 515}
+```
+
+The probabilities are exact. The counts are one sample of 1024 shots; yours
+will differ by a few tens.
+
+## 4. The explanation
+
+- Before the gate, the state vector is `[1, 0]`: outcome `0` with certainty.
+- Hadamard writes the same amplitude, $1/\sqrt{2} \approx 0.707$, onto both
+  entries.
+- A probability is an amplitude's squared length. $0.707^2 = 0.5$, so each
+  outcome has probability one half.
+- `measure_all` draws bitstrings from that distribution. It does not change
+  the state vector you already printed.
+
+## 5. The math
+
+<Equation tex="|0\rangle = \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \qquad H = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}" />
+
+<Equation tex="H|0\rangle = \frac{1}{\sqrt{2}} \begin{pmatrix} 1 \\ 1 \end{pmatrix} = \frac{|0\rangle + |1\rangle}{\sqrt{2}}" />
+
+<Equation tex="P(0) = P(1) = \left|\frac{1}{\sqrt{2}}\right|^2 = \frac{1}{2}" />
+
+<Callout>
+  **Key insight:** superposition is a pair of amplitudes, not a hidden bit.
+  The simulator stores both numbers. A measurement throws one of them away and
+  reports the bit that remains.
+</Callout>
+
+## Try it yourself
+
+- Delete the Hadamard and run the circuit again. Which probability becomes 1?
+- Change `shots` to `10000`. How much closer is the split to 5120 / 5120?
+- Continue with [Interference](/docs/tutorials/interference), where a second
+  Hadamard makes those two amplitudes cancel.
