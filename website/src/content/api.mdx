@@ -21,11 +21,11 @@ from fqkit import (
 QuantumCircuit(num_qubits: int)
 ```
 
-- `.num_qubits` — number of qubits
-- `.qubits` — list of `Qubit` objects
-- `.operations` — ordered list of `Operation`s
-- `.add_gate(gate, target_qubits)` — append a gate; validates targets
-- `.to_qasm(measure=True)` — export to an OpenQASM 2.0 string
+- `.num_qubits`: number of qubits
+- `.qubits`: list of `Qubit` objects
+- `.operations`: ordered list of `Operation`s
+- `.add_gate(gate, target_qubits)`: append a gate; validates targets
+- `.to_qasm(measure=True)`: export to an OpenQASM 2.0 string
 
 ## Gates
 
@@ -80,7 +80,25 @@ to_qasm(circuit, measure=True) -> str
 Serializes a circuit to OpenQASM 2.0. Raises `ValueError` for unbound
 parameters or gates with no QASM equivalent.
 
+## Hardware jobs
+
+Imported from `fqkit.hardware`, not from the top-level `fqkit` package:
+
+```python
+from fqkit.hardware import providers, backends, submit, get_job
+```
+
+- `providers()`: the machines you can name, and whether that SDK is installed
+- `backends(machine, live=False)`: the default device, or the live list when `live=True`
+- `submit(circuit, machine, shots=1024, backend=None)`: send a job, return a `HardwareJob`
+- `get_job(machine, job_id)`: reconnect to a job that is already running
+- `job.status()`: `QUEUED`, `RUNNING`, `COMPLETED`, `CANCELLED`, or `FAILED`
+- `job.counts()`: wait, then return bitstrings in FQkit order
+- `job.cancel()`: ask the vendor to cancel
+
+The walkthrough is [Hardware](/docs/hardware).
+
 ## Other classes
 
-- `Qubit(index)` — a stateless reference to a qubit by index
-- `Operation(gate, target_qubits)` — a gate bound to specific qubits
+- `Qubit(index)`: a stateless reference to a qubit by index
+- `Operation(gate, target_qubits)`: a gate bound to specific qubits

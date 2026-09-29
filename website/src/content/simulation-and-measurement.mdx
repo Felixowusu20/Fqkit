@@ -7,7 +7,7 @@ description: Run circuits and read out results.
 
 ## Running a circuit
 
-`run(circuit)` simulates the circuit and returns the final **statevector** — a
+`run(circuit)` simulates the circuit and returns the final **statevector**: a
 complex NumPy array of length `2**num_qubits`.
 
 ```python
@@ -26,8 +26,8 @@ The circuit always starts in `|00...0>` and each operation is applied in order.
 ## How the simulator works
 
 Each gate is applied to the statevector by **tensor contraction**. This is what
-lets multi-qubit gates act on any set of qubits — including non-adjacent or
-reversed ones — correctly.
+lets multi-qubit gates act on any set of qubits, including non-adjacent or
+reversed ones.
 
 ## Measuring
 
@@ -47,6 +47,6 @@ print(counts)   # {'00': 512, '11': 512}
 <Callout type="warning">
   FQkit uses **big-endian** ordering: qubit 0 is the most significant bit of the
   bitstring. So the bitstring `01` means qubit 0 measured `0` and qubit 1
-  measured `1`. Qiskit uses the opposite (little-endian) convention — see
+  measured `1`. Qiskit uses the opposite (little-endian) convention: see
   [OpenQASM & Hardware](/docs/openqasm).
 </Callout>

@@ -1,0 +1,31 @@
+title: Physics phase
+description: Read a phase with the Ramsey sequence used by clocks and interferometers.
+order: 7
+cells:
+  - kind: markdown
+    source: |
+      `P(1)` should be `sin(theta / 2)` squared. At `pi` the outcome is 1. At `0` it is 0.
+
+      Set `theta` to `3 * math.pi / 2` and predict `P(1)` before you run the cell.
+  - kind: code
+    source: |
+      import math
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, RZ, run
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      def ramsey(theta):
+          qc = QuantumCircuit(1)
+          qc.add_gate(Hadamard(), [0])
+          qc.add_gate(RZ(theta), [0])
+          qc.add_gate(Hadamard(), [0])
+          state = run(qc)
+          print(f"theta = {theta:.4f}   P = {np.round(np.abs(state) ** 2, 4)}")
+          return qc, state
+
+      ramsey(0.0)
+      ramsey(math.pi / 2)
+      qc, state = ramsey(math.pi)
+      show(qc)
+      plot(state)

@@ -35,7 +35,7 @@ print(fqkit.__version__)   # 0.1.0
 ```
 
 <Callout type="info">
-  Everything here is free. FQkit adds no paid dependencies — just NumPy.
+  Everything here is free. FQkit adds no paid dependencies: just NumPy.
 </Callout>
 
 ## Run the tests
@@ -44,5 +44,18 @@ print(fqkit.__version__)   # 0.1.0
 pytest -v
 ```
 
-You should see 29 tests pass, covering every gate, entanglement, parameter
-binding, measurement, and the OpenQASM export.
+You should see 46 tests pass, covering every gate, entanglement, parameter
+binding, measurement, the OpenQASM export, and hardware job submission.
+
+## Hardware extras
+
+The core install does not include a vendor SDK. Add one when you want to
+send jobs to a real machine:
+
+```bash
+pip install -e ".[ibm]"       # IBM Quantum
+pip install -e ".[braket]"    # IonQ, Rigetti, IQM, AQT
+pip install -e ".[hardware]"  # both
+```
+
+See [Hardware](/docs/hardware) for the account, the runtime, and how to submit a job.

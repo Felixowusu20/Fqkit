@@ -1,0 +1,92 @@
+---
+title: '4. Cryptography'
+description: Share one secret bit with BB84, and see why measuring in the wrong basis randomizes it.
+---
+
+# 4. Cryptography
+
+Bennett and Brassard, in 1984, showed a way for Alice and Bob to grow a shared secret from single qubits. The protocol is called BB84. Its security is not a hard mathematical problem. It is the fact that measuring a qubit disturbs it.
+
+## The question
+
+Alice wants Bob to hold the same bit she holds. Someone else may be looking. How do Alice and Bob notice?
+
+Alice prepares one of four states. Two of them are the ordinary bits, and two of them are the superposition states from the [superposition](/docs/tutorials/superposition) lesson.
+
+| Alice's bit | Alice's basis | She prepares |
+| --- | --- | --- |
+| 0 | Z | the starting state <Math tex="\lvert 0\rangle" /> |
+| 1 | Z | <Math tex="\mathrm{RX}(\pi)" />, which measures as 1 |
+| 0 | X | a Hadamard, the state <Math tex="\lvert +\rangle" /> |
+| 1 | X | a Hadamard, then <Math tex="\mathrm{RZ}(\pi)" /> |
+
+Bob picks a basis too. Measuring in Z means measuring the qubit as it arrives. Measuring in X means a Hadamard first, then the same measurement. They do this for many qubits, then announce the bases only, not the bits. They keep the rounds where the bases matched.
+
+## The quantum idea
+
+When the bases match, Bob's bit equals Alice's bit. When the bases differ, Bob's bit is a coin flip, even though nobody touched the qubit except Bob. That coin flip is the disturbance. In the full protocol Alice and Bob sacrifice a sample of the matching rounds and compare those bits in public. Too many disagreements means the transmission was disturbed, and they throw the secret away. The bits they do not compare become the key.
+
+This page runs the four honest cases. It does not build an eavesdropper.
+
+## A toy you can run
+
+Alice prepares the X-basis state for bit 0, and Bob measures in Z. The bases differ, so the bit should be random.
+
+<Circuit spec="H 0" caption="Alice sends the plus state. Bob measures in Z and learns nothing certain." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, RX, RZ, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def exchange(prep, bob_measures_x):
+    qc = QuantumCircuit(1)
+    for gate in prep:
+        qc.add_gate(gate, [0])
+    if bob_measures_x:
+        qc.add_gate(Hadamard(), [0])
+    probabilities = np.abs(run(qc)) ** 2
+    print(np.round(probabilities, 4))
+
+print("Z bit 0, Bob measures Z")
+exchange([], False)
+print("Z bit 1, Bob measures Z")
+exchange([RX(math.pi)], False)
+print("X bit 0, Bob measures X")
+exchange([Hadamard()], True)
+print("X bit 1, Bob measures X")
+exchange([Hadamard(), RZ(math.pi)], True)
+print("X bit 0, Bob measures Z")
+exchange([Hadamard()], False)
+print("Z bit 0, Bob measures X")
+exchange([], True)
+```
+
+```text
+Z bit 0, Bob measures Z
+[1. 0.]
+Z bit 1, Bob measures Z
+[0. 1.]
+X bit 0, Bob measures X
+[1. 0.]
+X bit 1, Bob measures X
+[0. 1.]
+X bit 0, Bob measures Z
+[0.5 0.5]
+Z bit 0, Bob measures X
+[0.5 0.5]
+```
+
+The first four lines are matching bases: Bob is certain, and the certain outcome is Alice's bit. The last two lines are a mismatch: each outcome has probability <Math tex="1/2" />.
+
+## Follow up
+
+1. In the [cryptography notebook](/notebooks/cryptography), prepare Alice's X-basis bit 1 and measure in X. The printout should be outcome 1 with probability 1.
+2. Then measure that same preparation in Z. Explain, in one sentence, why that round cannot be kept as key.
+3. Sending the qubit is a communications problem. The [telecommunications](/docs/applications/telecommunications) page is the partner protocol: a shared pair, then a message. A deployed quantum network uses both ideas.
+
+## The real scale
+
+A key-distribution link sends millions of these qubits through fiber or free space, sifts the matching bases, estimates the error rate, and then runs classical error correction and privacy amplification on the kept bits. FQkit will show you one qubit of that link. The error correction and the security proof are classical work that sits beside the circuit, not inside it.

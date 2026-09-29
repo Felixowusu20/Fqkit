@@ -1,0 +1,138 @@
+---
+title: "3. Grover's algorithm"
+description: Search an unstructured list by marking an item with a phase, from the two-item picture to why extra iterations undo the answer.
+---
+
+# 3. Grover's algorithm
+
+Grover's algorithm finds a marked item when nothing about the list helps you
+order or hash it. The best classical method checks items until it hits the
+marked one. Grover checks about <Math tex="\sqrt{N}" /> times instead of about $N$.
+
+This page builds the smallest case in which that is exact: four items, one of
+them marked, one iteration, and a certain answer.
+
+## The problem
+
+There are $N = 2^n$ possible bitstrings. An oracle tells you, for one string
+at a time, whether it is the marked item. You need the marked string.
+
+For two bits the list is `00`, `01`, `10`, `11`. Suppose `11` is marked.
+Classically you may have to test three strings before the last one is forced.
+There is no ordering to exploit.
+
+## The principle
+
+Do not write the answer into a bit. Write it into a **phase**, then let
+interference move the probability.
+
+1. Start with every string at the same amplitude, using a Hadamard on each
+   qubit.
+2. **Oracle.** Multiply the marked amplitude by $-1$. For $|11\rangle$ that
+   oracle is one `CZ`.
+3. **Diffusion.** Reflect every amplitude about the average amplitude. The
+   marked one, which sat below the average, reflects to a large value. The
+   others, which sat near the average, reflect toward zero.
+
+`RX(π)` is a bit flip, the Pauli $X$, up to a phase that measurement ignores.
+The diffusion step is: Hadamards, bit flips, a `CZ`, bit flips, Hadamards.
+
+## From the simple case to the harder one
+
+**Two items** would be one qubit. A single marked item and one Grover step is
+almost the interference lesson: a phase and a Hadamard. It is too small to
+show a list.
+
+**Four items,** worked below, is the first honest search. One iteration moves
+all of the probability onto $|11\rangle$. The amplitude is $-1$. The minus
+sign is global and does not change the shots: all of them read `11`.
+
+**More items.** With $N$ items the rotation toward the marked state is about
+<Math tex="1/\sqrt{N}" /> of a turn per iteration. You repeat the oracle-plus-diffusion
+pair about <Math tex="(\pi/4)\sqrt{N}" /> times. Stop there.
+
+**Too many iterations is worse, not better.** On four items a second iteration
+rotates past the answer and returns the uniform distribution. That is the
+exercise. The same overshoot happens for large $N$ if you run past the
+<Math tex="\sqrt{N}" /> count: probability drains off the marked item.
+
+**Several marked items.** If $M$ items are marked, the count of iterations
+drops to about <Math tex="(\pi/4)\sqrt{N/M}" />. You do not need to know $M$ in advance;
+there is a version that estimates it. That version is the hard form of the
+algorithm, and it is the one used inside optimization.
+
+## A worked example
+
+<Circuit spec="H 0; H 1; CZ 0 1; H 0; H 1; RX pi 0; RX pi 1; CZ 0 1; RX pi 0; RX pi 1; H 0; H 1" caption="One Grover iteration that marks 11." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, CZ, RX, run, measure_all
+
+np.set_printoptions(precision=4, suppress=True)
+
+qc = QuantumCircuit(2)
+
+for q in (0, 1):
+    qc.add_gate(Hadamard(), [q])
+
+qc.add_gate(CZ(), [0, 1])              # oracle: mark |11>
+
+for q in (0, 1):
+    qc.add_gate(Hadamard(), [q])
+for q in (0, 1):
+    qc.add_gate(RX(math.pi), [q])
+qc.add_gate(CZ(), [0, 1])              # diffusion
+for q in (0, 1):
+    qc.add_gate(RX(math.pi), [q])
+for q in (0, 1):
+    qc.add_gate(Hadamard(), [q])
+
+state = run(qc)
+print("Probabilities:", np.round(np.abs(state) ** 2, 4))
+print("Counts       :", measure_all(state, shots=1024))
+```
+
+```text
+Probabilities: [0. 0. 0. 1.]
+Counts       : {'11': 1024}
+```
+
+## Problems
+
+1. Delete only the oracle `CZ`, the first one, not the `CZ` inside the
+   diffusion, and run the circuit. Which strings appear, and what does that
+   tell you the diffusion does by itself?
+2. Repeat the oracle and the diffusion a second time on the original circuit.
+   Is `11` still certain? Relate what you see to the warning about too many
+   iterations.
+3. You want to mark `|01⟩` instead of `|11⟩`. A single `CZ` between qubit 0
+   and qubit 1 will not do it. Which flips do you put around that `CZ` so the
+   minus sign lands on `|01⟩` only? Run it and check that every shot is `01`.
+
+## Where it is used
+
+Grover's algorithm is a search subroutine, not a database product. Loading an
+arbitrary classical database into a quantum oracle can cost as much as scanning
+the database, so "search Google with Grover" is not a real deployment. The
+uses that survive that warning are:
+
+- **Key search.** Trying every key of a symmetric cipher is unstructured
+  search. Grover cuts the number of trials from $2^n$ to about <Math tex="2^{n/2}" />.
+  That is why post-quantum guidance treats an $n$-bit key as having about
+  $n/2$ bits of quantum security, and why AES-256 is the conservative choice
+  when AES-128 would otherwise have been enough. This is a cost argument, not
+  a program you need in order to attack a system.
+- **Minimum finding.** Dürr and Høyer use Grover to find the smallest value in
+  an unsorted table. Combinatorial optimization calls this as an inner loop.
+- **Amplitude amplification.** Any quantum algorithm whose success probability
+  is small can be wrapped in the same reflect-and-mark step. Grover is the
+  special case where the "algorithm" was just "guess a string."
+- **Collision finding and subset search**, as a component inside larger
+  quantum algorithms, with the same square-root reduction in the number of
+  oracle calls.
+
+Next: [Variational algorithms](/docs/algorithms/variational-algorithms), which
+give up the exact answer and instead tune a circuit until a measured cost is
+small. That is the form used on today's noisy hardware.

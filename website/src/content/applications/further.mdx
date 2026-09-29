@@ -1,0 +1,44 @@
+---
+title: '5. Further sectors'
+description: Optimization, sensing, materials, and medicine, each tied back to a circuit you can already run.
+---
+
+# 5. Further sectors
+
+The four sectors before this page are the ones with a complete toy. The sectors below are larger, and they reuse those toys rather than introducing a new kind of circuit.
+
+## Optimization and logistics
+
+Routing trucks, assigning crews, and cutting a network into pieces are search problems. Two quantum ideas show up.
+
+Unstructured search is [Grover's algorithm](/docs/algorithms/grover). One marked item in a list of four is the worked example. The follow up is to change which item is marked and predict the measured bitstring.
+
+Combinatorial scores, such as the number of broken constraints in a schedule, use the same prepare-and-score loop as [chemistry](/docs/applications/chemistry). The score is a cost instead of an energy. One layer of that idea is already described with the variational algorithms. More layers mean a better guess and a deeper circuit.
+
+Try this: take the Grover notebook and name one real list the marked item could stand for. A seat, a route, a key. The circuit does not know the story. You should.
+
+## Sensing
+
+A magnetometer and a gravimeter often run the [Ramsey sequence](/docs/applications/physics). The phase <Math tex="\theta" /> is no longer a number you typed. It is the field, accumulated while the qubit waited between the two Hadamards.
+
+<Equation tex="P(1) = \sin^2(\theta / 2)" />
+
+If <Math tex="P(1)" /> moves from 0 to 0.5, the phase moved from 0 to <Math tex="\pi/2" />. That is the whole sensor: turn a probability into a field strength, using a calibration you measured earlier.
+
+Follow up: in the [physics notebook](/notebooks/physics), treat the angle as "wait time times field". Double the angle and recompute <Math tex="P(1)" /> by hand before you run the cell.
+
+## Materials
+
+A material's useful properties, conductivity, magnetism, and the temperature where a new phase appears, often come down to the energy of its electrons. That is the chemistry problem with a periodic lattice instead of a molecule.
+
+The toy on the [chemistry](/docs/applications/chemistry) page already has the rule that matters: write the energy as averages of Pauli measurements, score a circuit, keep the lower score. A crystal adds more qubits and more terms. It does not add a new kind of step.
+
+## Medicine and drug discovery
+
+Estimating whether a drug candidate binds a protein is, at the expensive core, an energy comparison between two arrangements of the same atoms. The [chemistry](/docs/applications/chemistry) loop is the quantum part. The rest of a drug project, synthesis, safety, and trials, is not a circuit.
+
+Follow up: write the two arrangements as two calls to the energy function in the chemistry notebook, and say which call you would keep. Use the three guesses already on that page if you do not want to invent a new circuit.
+
+## What this toolkit will not pretend to do
+
+A sector page is finished when you can point at the circuit, the number it prints, and the larger problem that number stands in for. Training a machine-learning model, pricing a financial contract, and simulating a protein in a cell are not finished in that sense inside fqkit. They borrow the variational loop or Grover's search, and the honest next step is the lesson linked above, not a larger claim.

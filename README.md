@@ -1,11 +1,10 @@
 # FQkit
 
-FQkit is a lightweight Python framework for building and simulating quantum
-circuits. It is designed to be readable and approachable, so beginner quantum
-enthusiasts — in Africa and around the world — can learn how a quantum computer
-works by reading and hacking on the source.
+FQkit is a small Python framework for building and simulating quantum
+circuits. The source stays short on purpose, so you can learn how a quantum
+computer works by reading it and changing it.
 
-> **Documentation website:** the full docs live in [`website/`](website) — a
+> **Documentation website:** the full docs live in [`website/`](website): a
 > Next.js + Nextra site. Run it locally with `cd website && npm install && npm
 > run dev`, or deploy it for free on Vercel (see the
 > [website README](website/README.md)).
@@ -18,7 +17,7 @@ works by reading and hacking on the source.
 - Parameter binding for variational circuits
 - A statevector simulator that returns the final state
 - Measurement with shot-based sampling
-- Export to OpenQASM 2.0 — run your circuits on real IBM hardware via Qiskit
+- Export to OpenQASM 2.0: run your circuits on real IBM hardware via Qiskit
 
 ## Installation
 
@@ -39,7 +38,7 @@ pytest
 
 ## Quick start
 
-Build a Bell state — an entangled pair of qubits — and measure it:
+Build a Bell state, an entangled pair of qubits, and measure it:
 
 ```python
 from fqkit import QuantumCircuit, Hadamard, CNOT, run, measure_all
@@ -57,7 +56,7 @@ print("Counts:", counts)          # -> {'00': ~512, '11': ~512}
 
 ## Variational circuits
 
-Gates can take symbolic `Parameter`s that you bind to numbers later — the basis
+Gates can take symbolic `Parameter`s that you bind to numbers later: the basis
 of variational algorithms like VQE and QAOA:
 
 ```python
@@ -75,11 +74,11 @@ counts = measure_all(run(qc), shots=1024)
 print(counts)
 ```
 
-## Export to OpenQASM — run on real hardware
+## Export to OpenQASM: run on real hardware
 
 Any circuit can be exported to OpenQASM 2.0, the open standard that Qiskit
 reads. That means a circuit you build in fqkit can run on a **real quantum
-computer** through IBM Quantum's free tier — no hardware of your own needed.
+computer** through IBM Quantum's free tier: no hardware of your own needed.
 Everything in this pipeline (OpenQASM, Qiskit, the IBM free tier) costs nothing.
 
 ```python
@@ -115,24 +114,46 @@ print(Statevector.from_instruction(qiskit_qc).probabilities_dict())
 # {'00': 0.5, '11': 0.5}
 ```
 
-### Run on a real IBM Quantum backend (free tier)
+### Run on real hardware
 
-```python
-# 1. Create a free account at https://quantum.cloud.ibm.com
-# 2. pip install qiskit-ibm-runtime, then save your token once:
-#      from qiskit_ibm_runtime import QiskitRuntimeService
-#      QiskitRuntimeService.save_account(channel="ibm_quantum", token="<YOUR_TOKEN>")
-# 3. Run the exported circuit on the least-busy real device:
-#      from qiskit import transpile
-#      service = QiskitRuntimeService()
-#      backend = service.least_busy(operational=True, simulator=False)
-#      job = backend.run(transpile(qiskit_qc, backend), shots=1024)
-#      print(job.result().get_counts())
+`run()` stays on your computer. Hardware jobs go through `fqkit.hardware`,
+which calls the vendor SDK, waits on the queue, and returns counts in fqkit
+bit order (qubit 0 on the left). The vendor packages are optional, so a normal
+install still depends only on NumPy.
+
+```bash
+pip install "fqkit[ibm]"       # IBM Quantum, through Qiskit Runtime
+pip install "fqkit[braket]"    # IonQ, Rigetti, IQM, and AQT, through Amazon Braket
+pip install "fqkit[hardware]"  # both
 ```
 
-> **Bit order:** fqkit treats qubit 0 as the most significant bit, while Qiskit
-> prints measured bitstrings least-significant-bit first. The circuit and its
-> correlations are identical — only the printed string may look reversed.
+```python
+from fqkit.hardware import providers, submit
+
+providers()                    # ibm, ionq, rigetti, iqm, aqt
+
+job = submit(qc, "ibm", shots=1024)
+print(job.job_id, job.status())   # QUEUED, RUNNING, COMPLETED, CANCELLED, FAILED
+print(job.counts())               # waits for the device
+
+job = submit(qc, "ionq", shots=100)
+job = submit(qc, "rigetti", shots=100)
+```
+
+IBM needs a free account at https://quantum.cloud.ibm.com. Save the token once
+with `QiskitRuntimeService.save_account`, or pass `token=` to `submit`. With
+no backend name, fqkit picks the least busy real device. Pass
+`backend="ibm_..."` to choose one, or `backends("ibm", live=True)` to list
+the devices that are up.
+
+IonQ, Rigetti, IQM, and AQT are one Amazon Braket account. Those QPU tasks are
+billed by AWS. `submit(qc, "ionq")` targets IonQ Forte-1. Pass `backend=` as a
+full device ARN when you need a different chip. `job.status()` returns
+immediately. `job.counts()` blocks until the machine finishes. `get_job(machine,
+job_id)` reconnects to a job you already submitted.
+
+The lessons in the browser keep using the local simulator. A hardware token
+stays in your own Python process.
 
 ## Project layout
 
@@ -148,6 +169,9 @@ fqkit/
     simulator.py          # run: apply gates to a statevector
     measurement.py        # measure_all: sample |amplitude|^2
     qasm.py               # to_qasm: export circuits to OpenQASM 2.0
+  hardware/
+    ibm.py                # IBM Quantum via Qiskit Runtime
+    braket.py             # IonQ, Rigetti, IQM, AQT via Amazon Braket
 ```
 
 ## Convention
@@ -159,13 +183,13 @@ its most significant qubit (for `CNOT`, the control).
 ## Testing
 
 FQkit ships with a `pytest` suite covering the simulator, every gate, parameter
-binding, measurement, input validation, and the OpenQASM export — including
+binding, measurement, input validation, and the OpenQASM export, including
 round-trip tests that load an exported circuit into Qiskit and check that the
 statevectors match fqkit's own simulator.
 
 ```bash
 pip install -e ".[dev]"   # installs pytest
-pytest -v                 # 29 tests
+pytest -v                 # 46 tests
 ```
 
 The Qiskit round-trip tests are skipped automatically if Qiskit is not
@@ -175,3 +199,4 @@ installed. Install it (free) with `pip install qiskit` to run those too.
 |---|---|
 | `tests/test_fqkit.py` | Single- and multi-qubit gates, entanglement (Bell states), reversed and non-adjacent controls, parameter binding, unbound-parameter errors, measurement statistics, and input validation |
 | `tests/test_qasm.py` | OpenQASM string output, gate-name mapping, error handling, and Qiskit round-trip equivalence |
+| `tests/test_hardware.py` | Machine selection, OpenQASM 3 for Braket, Runtime and Braket submission with stand-in SDKs, job status, and bit order |

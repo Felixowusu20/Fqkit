@@ -1,0 +1,120 @@
+---
+title: '2. Bernstein-Vazirani'
+description: Learn a hidden bitstring from a linear function in one query, starting from Deutsch's one-bit case.
+---
+
+# 2. Bernstein-Vazirani
+
+Bernstein-Vazirani is Deutsch's algorithm with a bigger question. Instead of
+"constant or balanced?", the function hides a bitstring, and one query returns
+the whole string.
+
+## The problem
+
+Someone picks a secret string $s$ of $n$ bits. You may call
+
+<Equation tex="f(x) = s \cdot x = s_0 x_0 + s_1 x_1 + \cdots \pmod 2" />
+
+which is the parity of the bits where both $s$ and $x$ are `1`. You need to
+report $s$.
+
+Classically, each call gives one bit of information about $s$. Learning $n$
+bits takes $n$ calls: try $x$ with a single `1` in each position.
+
+For $n = 1$, the two secrets are $s = 0$ (a constant function) and $s = 1$
+(the balanced function $f(x) = x$). Deutsch already separates those. This
+algorithm is that test, repeated across every bit at once.
+
+## The principle
+
+Put every possible $x$ into superposition, and put the ancilla in $|-\rangle$,
+as in Deutsch. The oracle kicks the phase <Math tex="(-1)^{s \cdot x}" /> onto $|x\rangle$.
+Hadamards on the input register then interfere. The only string with
+non-zero probability is $s$ itself.
+
+The ancilla is not part of the answer. It is the scratch pad that makes the
+phase legal. After the query it is still $|-\rangle$, up to a sign.
+
+## From the simple case to the harder one
+
+**One bit.** Secret `1`: the oracle is one CNOT, from that bit onto the
+ancilla. The final Hadamard returns `1`. Secret `0`: there is no CNOT, and the
+Hadamard returns `0`. That is Deutsch.
+
+**Two bits.** Secret `11` means $f(x) = x_0 + x_1 \pmod 2$. The oracle is two
+CNOTs, one from each input qubit onto the same ancilla. Both bits are
+recovered together, still with one call to $f$.
+
+**Many bits.** Add one input qubit and one CNOT per bit of $s$ that is `1`.
+The query count stays one. The circuit gets wider, not deeper in queries. The
+hard part in practice is building the oracle when $s$ is defined by a large
+program rather than by a string you already know: if you already know $s$,
+you do not need the algorithm. The algorithm matters when $f$ is a black box
+that implements the dot product.
+
+## A worked example
+
+Secret $s = 11$. Qubits 0 and 1 are the input. Qubit 2 is the ancilla. The
+measured string is the first two bits; the ancilla bit is not part of $s$.
+
+<Circuit spec="RX pi 2; H 0; H 1; H 2; CNOT 0 2; CNOT 1 2; H 0; H 1" caption="Bernstein-Vazirani for the secret 11. Qubit 2 is the ancilla." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, CNOT, RX, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+qc = QuantumCircuit(3)
+qc.add_gate(RX(math.pi), [2])          # ancilla |1>
+for q in (0, 1, 2):
+    qc.add_gate(Hadamard(), [q])       # inputs in |+>, ancilla in |->
+
+# Oracle for s = 11: a CNOT from every secret bit that is 1.
+qc.add_gate(CNOT(), [0, 2])
+qc.add_gate(CNOT(), [1, 2])
+
+for q in (0, 1):
+    qc.add_gate(Hadamard(), [q])
+
+probabilities = np.round(np.abs(run(qc)) ** 2, 4)
+labels = [format(i, "03b") for i in range(8)]
+print({labels[i]: float(probabilities[i]) for i in range(8) if probabilities[i]})
+```
+
+```text
+{'110': 0.5, '111': 0.5}
+```
+
+Both surviving strings start with `11`. That prefix is the secret. The final
+bit is the ancilla, which is still an even mixture of `0` and `1`.
+
+## Problems
+
+1. Change the oracle so the secret is `01`, then `10`. Which two-bit prefix
+   survives in each case?
+2. Use no CNOTs at all. This is the secret `00`. What prefix do you measure,
+   and why did the circuit still need the ancilla Hadamard?
+3. Add a fourth qubit and recover the three-bit secret `101`. Draw the CNOTs
+   before you run it: which input qubits connect to the ancilla?
+
+## Where it is used
+
+The hidden-string problem is a model problem, like Deutsch's. Its uses are
+real, and they are specific:
+
+- **Exact learning of linear functions.** In quantum learning theory this is
+  the standard example of a function class that a quantum query learns with
+  one call and a classical query learns with $n$ calls.
+- **A subroutine.** Several larger quantum algorithms reduce a piece of their
+  work to "find the linear function consistent with this oracle." The circuit
+  above is that piece.
+- **A hardware test.** Because the right answer is a single known string,
+  laboratories use the algorithm to check that phase kickback still works when
+  more than one CNOT shares an ancilla.
+
+It does not break cryptography by itself. It learns a function that was
+defined to be a dot product. Next,
+[Grover's algorithm](/docs/algorithms/grover) drops that structure: the marked
+item can be anything, and the cost is no longer a single query.

@@ -1,0 +1,39 @@
+---
+title: Algorithms
+description: Quantum algorithms in fqkit, each developed from the problem statement to a worked example, practice problems, and real uses.
+---
+
+# Algorithms
+
+This section is separate from the [tutorials](/docs/tutorials). The tutorials
+teach superposition, interference, and entanglement. An algorithm is a
+procedure that uses those ideas to answer a definite question with fewer steps
+than the obvious classical method.
+
+Read them in order. Each page gets harder than the one before it, and each
+page itself moves from the simplest case to a harder one.
+
+## How every algorithm page is organized
+
+1. **The problem**: the question, stated so a classical program could answer it too.
+2. **The principle**: the one quantum idea that makes the procedure work.
+3. **From the simple case to the harder one**: one bit, then several; one query, then why the cost grows.
+4. **A worked example**: fqkit code and the output the simulator prints.
+5. **Problems**: for you to solve. The answers are not on the page.
+6. **Where it is used**: what the algorithm is actually for, including the limits.
+
+## The path
+
+| | Algorithm | The question it answers |
+| --- | --- | --- |
+| 1 | [Deutsch](/docs/algorithms/deutsch) | Is a one-bit function constant or balanced? |
+| 2 | [Bernstein-Vazirani](/docs/algorithms/bernstein-vazirani) | What is the hidden bitstring inside a linear function? |
+| 3 | [Grover](/docs/algorithms/grover) | Which item in an unstructured list is marked? |
+| 4 | [Variational algorithms](/docs/algorithms/variational-algorithms) | What is the lowest energy of a Hamiltonian, or a good solution of a combinatorial problem? |
+
+<Callout type="info">
+  Finish [Interference](/docs/tutorials/interference) before Deutsch. Phase
+  kickback is that lesson, reused as a query.
+</Callout>
+
+These procedures are what the [application sectors](/docs/applications) are built from. Chemistry uses the variational loop. Telecommunications and physics use interference and entanglement. Cryptography uses preparation and measurement.

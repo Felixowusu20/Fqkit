@@ -23,6 +23,18 @@ dependencies = [
 dev = [
     "pytest>=7.0",
 ]
+ibm = [
+    "qiskit>=1.3",
+    "qiskit-ibm-runtime>=0.30",
+]
+braket = [
+    "amazon-braket-sdk>=1.88",
+]
+hardware = [
+    "qiskit>=1.3",
+    "qiskit-ibm-runtime>=0.30",
+    "amazon-braket-sdk>=1.88",
+]
 
 [project.urls]
 Homepage = "https://github.com/Felixowusu20/Fqkit"

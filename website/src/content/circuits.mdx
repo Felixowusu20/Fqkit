@@ -27,7 +27,11 @@ qc.add_gate(Hadamard(), [0])
 qc.add_gate(CNOT(), [0, 1])
 ```
 
-Targets can be integer indices or `Qubit` objects — both work:
+The same circuit, drawn:
+
+<Circuit spec="H 0; CNOT 0 1" caption="Hadamard on qubit 0, then CNOT onto qubit 1." />
+
+Targets can be integer indices or `Qubit` objects: both work:
 
 ```python
 qc.add_gate(Hadamard(), [Qubit(0)])

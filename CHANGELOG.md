@@ -2,6 +2,16 @@
 
 All notable changes to FQkit are documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Hardware jobs.** `fqkit.hardware.submit` sends a circuit to IBM Quantum
+  through Qiskit Runtime, or to IonQ, Rigetti, IQM, and AQT through Amazon
+  Braket. The caller picks the machine by name, checks `job.status()`, and
+  reads `job.counts()` in fqkit bit order. The vendor SDKs are optional extras
+  (`fqkit[ibm]`, `fqkit[braket]`, `fqkit[hardware]`), so the core install
+  still depends only on NumPy.
+
 ## [0.1.0] - 2026-09-26
 
 ### Fixed
