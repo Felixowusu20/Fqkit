@@ -35,6 +35,15 @@ class QuantumCircuit:
         """
         return _to_qasm(self, measure=measure)
 
+    def draw(self, *, ax=None, filename=None, show=None):
+        """Draw this circuit with Matplotlib. Qubit 0 is the top wire.
+
+        See fqkit.core.draw.draw. Returns the figure.
+        """
+        from fqkit.core.draw import draw
+
+        return draw(self, ax=ax, filename=filename, show=show)
+
     def __repr__(self):
         op_str = '\n'.join([str(op) for op in self.operations])
         return f"QuantumCircuit({self.num_qubits}, [\n{op_str}\n])"

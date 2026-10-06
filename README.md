@@ -1,13 +1,35 @@
 # FQkit
 
-FQkit is a small Python framework for building and simulating quantum
-circuits. The source stays short on purpose, so you can learn how a quantum
-computer works by reading it and changing it.
+```text
+-------------------------------------------
+|                                         |
+|                        /\               |
+|                       /  \              |
+|                     / /\ \              |
+|                    / /  \ \             |
+|                  / /    \ \             |
+|                 / /______\ \            |
+|              /_/          \_\           |
+|                                         |
+|  ███████╗ ██████╗ ██╗  ██╗██╗████████╗  |
+|  ██╔════╝██╔═══██╗██║ ██╔╝██║╚══██╔══╝  |
+|   █████╗  ██║   ██║█████╔╝ ██║   ██║    |
+|   ██╔══╝  ██║▄▄ ██║██╔═██╗ ██║   ██║    |
+|   ██║     ╚██████╔╝██║  ██╗██║   ██║    |
+|   ╚═╝      ╚══▀▀═╝ ╚═╝  ╚═╝╚═╝   ╚═╝    |
+|                                         |
+|         Felix            Dorcas         |
+|                                         |
+-------------------------------------------
+```
 
-> **Documentation website:** the full docs live in [`website/`](website): a
-> Next.js + Nextra site. Run it locally with `cd website && npm install && npm
-> run dev`, or deploy it for free on Vercel (see the
-> [website README](website/README.md)).
+FQkit is a Python package for building and simulating quantum circuits. The
+library is written in Python. NumPy does the arithmetic, and Matplotlib draws
+the circuits and the probability graphs.
+
+Authors: Felix Owusu and Dr. Addo Dorcas Attuabea.
+
+Website: <https://fqkit.vercel.app/>
 
 ## Features
 
@@ -17,21 +39,24 @@ computer works by reading it and changing it.
 - Parameter binding for variational circuits
 - A statevector simulator that returns the final state
 - Measurement with shot-based sampling
+- `draw` and `plot` for circuit pictures and probability graphs
 - Export to OpenQASM 2.0: run your circuits on real IBM hardware via Qiskit
 
 ## Installation
 
-Clone the repository and install it in editable mode:
+```bash
+pip install fqkit
+fqkit
+```
+
+FQkit needs Python 3.9 or newer. NumPy and Matplotlib are installed with it.
+The `fqkit` command prints the mark above, with the authors' first names underneath.
+
+To work on the source, clone the repository and install it in editable mode:
 
 ```bash
 git clone https://github.com/Felixowusu20/Fqkit.git
 cd Fqkit
-pip install -e .
-```
-
-To run the test suite as well:
-
-```bash
 pip install -e ".[dev]"
 pytest
 ```
@@ -53,6 +78,28 @@ counts = measure_all(state, shots=1024)
 print("State :", state)
 print("Counts:", counts)          # -> {'00': ~512, '11': ~512}
 ```
+
+## Draw a circuit
+
+`draw` paints the wires with Matplotlib. Qubit 0 is the top wire. `plot`
+paints the probabilities, or the shot counts.
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT, draw, plot, run, measure_all
+import matplotlib.pyplot as plt
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+
+draw(qc)                 # or qc.draw()
+plt.show()
+
+plot(run(qc))            # one bar per basis state
+plt.show()
+```
+
+`draw(qc, filename="circuit.png")` saves the picture instead of opening a window.
 
 ## Variational circuits
 

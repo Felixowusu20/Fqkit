@@ -1,51 +1,36 @@
 ---
 title: Installation
-description: Install FQkit from source.
+description: Install FQkit with pip.
 ---
 
 # Installation
 
-FQkit is a pure-Python package. Install it from source in editable mode so you
-can read and modify the code as you learn.
+FQkit is a pure-Python package. Install it with pip.
 
 ## Requirements
 
 - Python 3.9 or newer
-- [NumPy](https://numpy.org) (installed automatically)
+- [NumPy](https://numpy.org) and [Matplotlib](https://matplotlib.org) (installed automatically)
 
 ## Install
 
 ```bash
-git clone https://github.com/Felixowusu20/Fqkit.git
-cd Fqkit
-pip install -e .
+pip install fqkit
+fqkit
 ```
 
-To also install the test tooling:
-
-```bash
-pip install -e ".[dev]"
-```
+`fqkit` prints the FQKIT mark, with Felix and Dorcas underneath.
 
 ## Verify
 
 ```python
 import fqkit
-print(fqkit.__version__)   # 0.1.0
+print(fqkit.__version__)   # 0.1.3
 ```
 
 <Callout type="info">
-  Everything here is free. FQkit adds no paid dependencies: just NumPy.
+  Everything here is free. The install is Python, and it brings NumPy and Matplotlib with it.
 </Callout>
-
-## Run the tests
-
-```bash
-pytest -v
-```
-
-You should see 46 tests pass, covering every gate, entanglement, parameter
-binding, measurement, the OpenQASM export, and hardware job submission.
 
 ## Hardware extras
 
@@ -53,9 +38,9 @@ The core install does not include a vendor SDK. Add one when you want to
 send jobs to a real machine:
 
 ```bash
-pip install -e ".[ibm]"       # IBM Quantum
-pip install -e ".[braket]"    # IonQ, Rigetti, IQM, AQT
-pip install -e ".[hardware]"  # both
+pip install "fqkit[ibm]"       # IBM Quantum
+pip install "fqkit[braket]"    # IonQ, Rigetti, IQM, AQT
+pip install "fqkit[hardware]"  # both
 ```
 
 See [Hardware](/docs/hardware) for the account, the runtime, and how to submit a job.

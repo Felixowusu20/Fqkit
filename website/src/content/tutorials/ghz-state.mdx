@@ -1,8 +1,7 @@
 ---
-title: '4. The GHZ state'
+title: 4. The GHZ state
 description: Build a three-qubit GHZ state and see that all three bits agree on every shot.
 ---
-
 # 4. The GHZ state
 
 The Bell state correlates two qubits. The **GHZ state** correlates three: one
@@ -47,23 +46,23 @@ the last (`111`). The counts move around 512 / 512; the zeros do not.
 
 ## 4. The explanation
 
-- Hadamard on qubit 0 creates the branches `000` and `100`.
-- CNOT from 0 to 1 turns `100` into `110`.
-- CNOT from 0 to 2 turns `110` into `111`.
-- The `000` branch is never flipped. No amplitude is left on `001`, `010`,
+* Hadamard on qubit 0 creates the branches `000` and `100`.
+* CNOT from 0 to 1 turns `100` into `110`.
+* CNOT from 0 to 2 turns `110` into `111`.
+* The `000` branch is never flipped. No amplitude is left on `001`, `010`,
   `011`, `100`, `101`, or `110`.
-- Any one qubit, looked at alone, is random. Any two already determine the
+* Any one qubit, looked at alone, is random. Any two already determine the
   third.
 
 ## 5. The math
 
 <Equation tex="|\mathrm{GHZ}\rangle = \frac{|000\rangle + |111\rangle}{\sqrt{2}}" />
 
-In fqkit's big-endian order the vector has length 8:
+In fqkit's big endian order the vector has length 8:
 
 <Equation tex="\frac{1}{\sqrt{2}}\begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{pmatrix}" />
 
-<Callout>
+<Callout type="default">
   **Key insight:** adding a qubit did not add a new independent coin. Both
   CNOTs copy the same superposition, so the only surviving outcomes are the
   two in which every bit agrees.
@@ -71,9 +70,9 @@ In fqkit's big-endian order the vector has length 8:
 
 ## Try it yourself
 
-- Drop the second CNOT. Which two bitstrings remain, and which qubit is now
+* Drop the second ***CNOT***. Which two bitstrings remain, and which qubit is now
   independent?
-- Change the second CNOT to `[1, 2]`. Is the final state the same GHZ state?
-- The algorithms that use these states are in
+* Change the second **CNOT** to `[1, 2]`. Is the final state the same GHZ state?
+* The algorithms that use these states are in
   [Algorithms](/docs/algorithms), starting with
   [Deutsch's algorithm](/docs/algorithms/deutsch).
