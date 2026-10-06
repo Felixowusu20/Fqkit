@@ -85,7 +85,7 @@ async function getRuntime(onStatus) {
       })
       pyodide._fqChunks = chunks
       onStatus('Loading NumPy and FQkit.')
-      await pyodide.loadPackage('numpy')
+      await pyodide.loadPackage(['numpy', 'micropip'])
       const response = await fetch('/api/fqkit-package')
       if (!response.ok) throw new Error('Could not load the FQkit package.')
       const files = await response.json()
@@ -110,6 +110,82 @@ _ns = {"__name__": "__main__"}
 exec(compile(_bootstrap, "<bootstrap>", "exec"), _ns)
 del _bootstrap
 `)
+}
+
+const PIP_LINE = /^[ \t]*(?:!|%)?pip3?[ \t]+install\b(.*)$/
+const PIP_FLAGS_WITH_VALUE = new Set([
+  '-c', '--constraint', '-t', '--target', '-i', '--index-url',
+  '--extra-index-url', '-f', '--find-links', '--prefix', '--root', '--src'
+])
+
+function pipRequirements(line) {
+  const match = PIP_LINE.exec(line)
+  if (!match) return null
+  const requirements = []
+  const tokens = []
+  const tokenPattern = /"([^"]*)"|'([^']*)'|(\S+)/g
+  let found = tokenPattern.exec(match[1])
+  while (found) {
+    tokens.push(found[1] ?? found[2] ?? found[3])
+    found = tokenPattern.exec(match[1])
+  }
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index]
+    if (token === '-r' || token === '--requirement') {
+      throw new Error('Install packages by name. This notebook cannot read a requirements file.')
+    }
+    if (PIP_FLAGS_WITH_VALUE.has(token)) {
+      index += 1
+      continue
+    }
+    if (token.startsWith('-')) continue
+    requirements.push(token)
+  }
+  if (!requirements.length) {
+    throw new Error('pip install needs at least one package name.')
+  }
+  return requirements
+}
+
+async function installPackages(pyodide, requirements) {
+  pyodide.globals.set('_fq_reqs', requirements)
+  try {
+    await pyodide.runPythonAsync(`
+import micropip
+await micropip.install([str(name) for name in _fq_reqs])
+`)
+  } finally {
+    try {
+      pyodide.globals.delete('_fq_reqs')
+    } catch {
+      // The name is already gone when installation fails first.
+    }
+  }
+}
+
+async function runCellSource(pyodide, source, chunks, onStatus) {
+  const lines = String(source || '').split('\n')
+  let buffer = []
+  const flush = async () => {
+    const code = buffer.join('\n')
+    buffer = []
+    if (!code.trim()) return
+    pyodide.globals.set('_cell', code)
+    await pyodide.runPythonAsync('exec(compile(_cell, "<cell>", "exec"), _ns)')
+  }
+  for (const line of lines) {
+    const requirements = pipRequirements(line)
+    if (!requirements) {
+      buffer.push(line)
+      continue
+    }
+    await flush()
+    onStatus(`Installing ${requirements.join(', ')}.`)
+    chunks.push(`Collecting ${requirements.join(', ')}\n`)
+    await installPackages(pyodide, requirements)
+    chunks.push(`Successfully installed ${requirements.join(' ')}\n`)
+  }
+  await flush()
 }
 
 function joinChunks(chunks) {
@@ -169,18 +245,25 @@ function parseOutput(text) {
   return parts
 }
 
-function CellOutput({ output }) {
-  if (!output || (!output.text && !output.error)) return null
-  const parts = parseOutput(output.text || '')
+function CellOutput({ output, onToggle, onClear }) {
+  const hasBody = Boolean((output?.text && output.text.trim()) || output?.error)
+  if (!output || output.running || !hasBody) return null
+  const parts = output.collapsed ? [] : parseOutput(output.text || '')
   return (
-    <div className={output.error ? 'colab-output colab-output-error' : 'colab-output'}>
+    <div className={output.error && !output.collapsed ? 'colab-output colab-output-error' : 'colab-output'}>
+      <div className="colab-output-actions">
+        <button type="button" onClick={onToggle}>
+          {output.collapsed ? 'Show output' : 'Hide output'}
+        </button>
+        <button type="button" onClick={onClear}>Clear output</button>
+      </div>
       {parts.map((part, index) => {
         if (part.type === 'circuit') return <CircuitDiagram key={index} spec={part.value} />
         if (part.type === 'bars') return <BarChart key={index} rows={part.rows} />
         const text = part.value.replace(/^\n+|\n+$/g, '')
         return text ? <pre key={index}>{text}</pre> : null
       })}
-      {output.error ? <pre className="colab-traceback">{output.error}</pre> : null}
+      {!output.collapsed && output.error ? <pre className="colab-traceback">{output.error}</pre> : null}
     </div>
   )
 }
@@ -239,7 +322,7 @@ export function CodingNotebook({ slug, cells: initialCells }) {
       await resetNamespace(pyodide)
       pyodide._fqSlug = slugRef.current
       kernel.current = pyodide
-      setStatus('Python is ready. Cells share one session, so a later cell can use names from an earlier one.')
+      setStatus('Python is ready. !pip install adds a library. Cells share one session.')
     }
     return pyodide
   }
@@ -262,8 +345,8 @@ export function CodingNotebook({ slug, cells: initialCells }) {
         pyodide._fqChunks = chunks
         pyodide.setStdout({ batched: text => chunks.push(text) })
         pyodide.setStderr({ batched: text => chunks.push(text) })
-        pyodide.globals.set('_cell', cell.source)
-        await pyodide.runPythonAsync('exec(compile(_cell, "<cell>", "exec"), _ns)')
+        await runCellSource(pyodide, cell.source, chunks, setStatus)
+        setStatus('Python is ready. !pip install adds a library. Cells share one session.')
         setOutputs(current => ({
           ...current,
           [cell.id]: { text: joinChunks(chunks), error: '', running: false }
@@ -311,6 +394,22 @@ export function CodingNotebook({ slug, cells: initialCells }) {
 
   function removeCell(id) {
     setCells(current => current.filter(cell => cell.id !== id))
+  }
+
+  function toggleOutput(id) {
+    setOutputs(current => {
+      const output = current[id]
+      if (!output || output.running) return current
+      return { ...current, [id]: { ...output, collapsed: !output.collapsed } }
+    })
+  }
+
+  function clearOutput(id) {
+    setOutputs(current => {
+      const output = current[id]
+      if (!output || output.running) return current
+      return { ...current, [id]: { text: '', error: '', running: false, collapsed: false } }
+    })
   }
 
   async function runAll() {
@@ -396,7 +495,13 @@ export function CodingNotebook({ slug, cells: initialCells }) {
                     <MarkdownView source={cell.source} />
                   </div>
                 )}
-                {isCode ? <CellOutput output={outputs[cell.id]} /> : null}
+                {isCode ? (
+                  <CellOutput
+                    output={outputs[cell.id]}
+                    onToggle={() => toggleOutput(cell.id)}
+                    onClear={() => clearOutput(cell.id)}
+                  />
+                ) : null}
               </div>
             </section>
             <InsertBar onCode={() => insertAt(index + 1, 'code')} onText={() => insertAt(index + 1, 'markdown')} />

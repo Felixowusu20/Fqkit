@@ -58,6 +58,13 @@ body {
   min-height: 100vh;
 }
 
+/* The column layout makes each child a flex item. Without this, a wide
+   code block or table stops the page from shrinking to a phone screen. */
+body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .fqkit-footer {
   box-sizing: border-box;
   width: min(100%, var(--nextra-content-width));
@@ -748,8 +755,27 @@ html.dark .circuit-svg .qlabel {
 }
 
 @media (max-width: 720px) {
+  .home {
+    padding: 28px 16px 48px;
+  }
+
   .home h1 {
-    font-size: 46px;
+    font-size: 40px;
+  }
+
+  .home-lead,
+  .notebook-lead {
+    font-size: 16px;
+  }
+
+  .fqkit-footer,
+  body:has(.lesson-shell) .fqkit-footer {
+    padding-inline: 16px;
+  }
+
+  .lesson-shell,
+  .lesson-shell.is-collapsed {
+    padding: 12px 12px 28px;
   }
 
   .home-circuits,
@@ -1030,6 +1056,25 @@ html.dark .colab-sheet {
   padding: 8px 16px 12px;
 }
 
+.colab-output-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.colab-output-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--colab-muted, #5f6368);
+  font: 12px/1 "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.colab-output-actions button:hover {
+  color: var(--colab-ink, #202124);
+}
+
 .colab-output pre {
   margin: 8px 0;
   white-space: pre-wrap;
@@ -1121,4 +1166,40 @@ html.dark .cm-tooltip-autocomplete {
 html.dark .cm-tooltip-autocomplete ul li[aria-selected] {
   background: #174ea6;
   color: #d2e3fc;
+}
+
+@media (max-width: 720px) {
+  .colab-bar {
+    padding: 4px 12px 8px;
+  }
+
+  .colab-insert {
+    margin-left: 0;
+  }
+
+  .colab-insert-actions {
+    display: flex;
+  }
+
+  .colab-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .colab-tools {
+    display: flex;
+    top: 4px;
+    right: 6px;
+  }
+
+  .katex-display,
+  .circuit-svg,
+  .circuit-figure,
+  .bar-chart {
+    max-width: 100%;
+  }
+
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
 }

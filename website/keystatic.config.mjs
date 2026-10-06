@@ -78,8 +78,20 @@ const collectionOptions = {
   schema: pageSchema
 }
 
+// Local storage writes files on the machine running the server. Vercel’s
+// filesystem is read-only, so the deployed admin cannot list or save pages.
+// GitHub storage reads and writes the repository instead. pathPrefix is the
+// website folder, because collection paths are relative to that folder.
+const storage = process.env.VERCEL
+  ? {
+      kind: 'github',
+      repo: 'Felixowusu20/Fqkit',
+      pathPrefix: 'website'
+    }
+  : { kind: 'local' }
+
 export default config({
-  storage: { kind: 'local' },
+  storage,
   ui: {
     brand: { name: 'FQkit', mark: FqkitMark }
   },

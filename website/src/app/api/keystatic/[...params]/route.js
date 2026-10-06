@@ -4,3 +4,4 @@ import config from '../../../../../keystatic.config.mjs'
 export const { GET, POST } = makeRouteHandler({ config })
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'

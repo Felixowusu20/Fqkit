@@ -20,7 +20,7 @@ class Gate:
         
 
 
-# # let try creating some gates (Hadamard, CNOT, RX)
+# # let try creating some gates (Hadamard, CNOT, RX , Toffoli , swap and the rest will be added)
 def Hadamard():
     return Gate(name="H", num_qubits=1, matrix=[[1/2**0.5, 1/2**0.5], [1/2**0.5, -1/2**0.5]])
 
