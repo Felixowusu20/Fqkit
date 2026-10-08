@@ -82,13 +82,16 @@ const collectionOptions = {
 // filesystem is read-only, so the deployed admin cannot list or save pages.
 // GitHub storage reads and writes the repository instead. pathPrefix is the
 // website folder, because collection paths are relative to that folder.
-const storage = process.env.VERCEL
-  ? {
-      kind: 'github',
-      repo: 'Felixowusu20/Fqkit',
-      pathPrefix: 'website'
-    }
-  : { kind: 'local' }
+// NEXT_PUBLIC_KEYSTATIC_STORAGE is set in next.config from VERCEL.
+// The admin page runs in the browser, and the browser cannot see VERCEL itself.
+const storage =
+  process.env.NEXT_PUBLIC_KEYSTATIC_STORAGE === 'github' || process.env.VERCEL
+    ? {
+        kind: 'github',
+        repo: 'Felixowusu20/Fqkit',
+        pathPrefix: 'website'
+      }
+    : { kind: 'local' }
 
 export default config({
   storage,
