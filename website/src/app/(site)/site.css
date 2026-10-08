@@ -173,6 +173,62 @@ body:has(.lesson-shell) .fqkit-footer {
   max-width: 100%;
 }
 
+.media-figure {
+  margin: 1.25rem 0 1.5rem;
+  max-width: 100%;
+}
+
+.media-figure img,
+.media-figure .media-video-file {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor 3%, transparent);
+}
+
+.media-figure figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.media-align-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.media-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.media-align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.media-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: #0b0b0c;
+}
+
+.media-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .circuit-svg {
   display: block;
   max-width: 100%;
@@ -1194,6 +1250,7 @@ html.dark .cm-tooltip-autocomplete ul li[aria-selected] {
   .katex-display,
   .circuit-svg,
   .circuit-figure,
+  .media-figure,
   .bar-chart {
     max-width: 100%;
   }
