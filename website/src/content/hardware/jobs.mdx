@@ -1,0 +1,90 @@
+---
+title: Job submission
+description: Choose a machine, submit an FQkit circuit, cancel a job, or reconnect to one.
+---
+
+# Job submission
+
+Build the circuit first. Submission only adds the machine name and the number of shots.
+
+```python
+from fqkit import QuantumCircuit, Hadamard, CNOT
+from fqkit.hardware import submit
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+
+job = submit(qc, "ibm", shots=1024)
+print(job.job_id)
+print(job.machine, job.backend)
+print(job.status())
+```
+
+`job` is a `HardwareJob`. The same object is returned for IBM and for a Braket machine.
+
+<Circuit spec="H 0; CNOT 0 1" caption="The circuit this job sends. Qubit 0 is the top wire." />
+
+## Arguments
+
+| Argument | Role |
+| --- | --- |
+| `circuit` | An FQkit `QuantumCircuit`. Parameters must already be numbers. |
+| `machine` | `"ibm"`, `"ionq"`, `"rigetti"`, `"iqm"`, or `"aqt"`. |
+| `shots` | How many times the device measures. The default is 1024. |
+| `backend` | Optional. An IBM device name, or a full Braket device ARN. |
+| `token`, `channel`, `instance` | Optional IBM sign-in, if you did not call `save_account`. |
+| `s3_location` | Optional Braket bucket, as `("bucket", "prefix")`. |
+
+```python
+job = submit(qc, "ionq", shots=100)
+job = submit(qc, "rigetti", shots=100)
+job = submit(qc, "iqm", shots=100)
+job = submit(qc, "aqt", shots=100)
+```
+
+## Choose a device
+
+The short name is enough for the default chip. List or override it when you need a specific one.
+
+```python
+from fqkit.hardware import backends
+
+backends("ibm")                 # ["least_busy"] until you ask the account
+backends("ibm", live=True)      # device names that are up right now
+backends("ionq")                # the label, then the device ARN
+```
+
+`live=True` contacts the account, so the credential from [Accounts](/docs/hardware/accounts) has to be in place. `live=False` only reads the list shipped with FQkit.
+
+```python
+submit(qc, "ibm", backend="ibm_fez", shots=1024)
+submit(qc, "ionq", backend="arn:aws:braket:us-east-1::device/qpu/ionq/Aria-1", shots=100)
+```
+
+Device names change. When a built-in Braket name is retired, pass that chip's ARN as `backend`. `"braket"` by itself is not a machine. Pass a name such as `"ionq"`, or pass `"braket"` together with `backend` set to a name or an ARN.
+
+`backends("braket", live=True)` asks AWS for online gate-model QPUs and returns their ARNs.
+
+## Cancel
+
+```python
+job.cancel()
+```
+
+Cancellation is a request. `job.status()` then reports `CANCELLED` once the vendor accepts it. A job that has already finished is left as `COMPLETED`.
+
+## Reconnect
+
+A job keeps running after your Python process exits. Save `job.job_id` and open it later:
+
+```python
+from fqkit.hardware import get_job
+
+job = get_job("ibm", "your-job-id")
+job = get_job("ionq", "arn:aws:braket:us-east-1:123456789012:quantum-task/your-task", num_qubits=2)
+```
+
+For IBM, the id is the Runtime job id. For a Braket machine, the id is the task ARN. Pass `num_qubits` when you know the width. If you omit it, `counts()` uses the width of the returned bitstrings.
+
+Next: [Results](/docs/hardware/results) reads those shots.

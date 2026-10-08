@@ -1,0 +1,91 @@
+---
+title: '2. Interference'
+description: See two Hadamard gates return a qubit to zero, and a phase gate change that result to one.
+---
+
+# 2. Interference
+
+Superposition is reversible. A second Hadamard brings the qubit back to
+$|0\rangle$, because the two paths cancel. Insert a phase between the
+Hadamards and the same cancellation produces $|1\rangle$ instead.
+
+## 1. The idea
+
+Each amplitude is a complex number, so it has a size and a phase. The second
+Hadamard adds the paths together. Equal phases reinforce $|0\rangle$ and cancel
+$|1\rangle$. A phase of $\pi$ on one path swaps which outcome survives.
+
+<Circuit spec="H 0; H 0" caption="Two Hadamards cancel and return 0." />
+
+<Circuit spec="H 0; RZ pi 0; H 0" caption="A phase of pi between the Hadamards returns 1." />
+
+## 2. The code
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, RZ, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+plain = QuantumCircuit(1)
+plain.add_gate(Hadamard(), [0])
+plain.add_gate(Hadamard(), [0])
+
+phased = QuantumCircuit(1)
+phased.add_gate(Hadamard(), [0])
+phased.add_gate(RZ(math.pi), [0])   # a relative phase of pi
+phased.add_gate(Hadamard(), [0])
+
+print("H H        :", np.round(run(plain), 4))
+print("H RZ(pi) H :", np.round(run(phased), 4))
+```
+
+## 3. The output
+
+```text
+H H        : [1.+0.j 0.+0.j]
+H RZ(pi) H : [0.+0.j 0.-1.j]
+```
+
+The first circuit is definitely `0`. The second is definitely `1`. The `-1j`
+is a global phase: it does not change the measurement, which is `1` on every
+shot.
+
+## 4. The explanation
+
+- The first Hadamard creates $(|0\rangle + |1\rangle)/\sqrt{2}$.
+- Hadamard applied to $|0\rangle$ and to $|1\rangle$ produces opposite signs on
+  $|1\rangle$. Adding them cancels $|1\rangle$ and restores $|0\rangle$.
+- `RZ(π)` multiplies $|0\rangle$ by $-i$ and $|1\rangle$ by $i$. That relative
+  minus sign reverses the cancellation, so $|0\rangle$ cancels and $|1\rangle$
+  remains.
+- No measurement noise is involved. Both results have probability 1.
+
+## 5. The math
+
+<Equation tex="H|0\rangle = \frac{|0\rangle + |1\rangle}{\sqrt{2}}, \qquad H|1\rangle = \frac{|0\rangle - |1\rangle}{\sqrt{2}}" />
+
+Adding those two expansions, the $|1\rangle$ terms cancel:
+
+<Equation tex="H\,H|0\rangle = \frac{1}{2}\big(|0\rangle + |1\rangle + |0\rangle - |1\rangle\big) = |0\rangle" />
+
+`RZ(π)` is a phase gate,
+
+<Equation tex="R_Z(\pi) = \begin{pmatrix} -i & 0 \\ 0 & i \end{pmatrix}" />
+
+and the full sequence leaves $-i|1\rangle$. Because $|-i|^2 = 1$, every
+measurement returns `1`.
+
+<Callout>
+  **Key insight:** a phase is invisible on a single amplitude and decisive
+  when two amplitudes are added. Interference is that addition.
+</Callout>
+
+## Try it yourself
+
+- Replace `math.pi` with `math.pi / 2` and print the probabilities. Are they
+  still 0 and 1?
+- Apply `RZ` *before* the first Hadamard. Does the final state change?
+- Continue with [The Bell state](/docs/tutorials/bell-state-lesson), which
+  uses the same Hadamard and then shares it with a second qubit.

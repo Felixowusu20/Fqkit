@@ -1,0 +1,35 @@
+title: Interference
+description: See a phase change which outcome survives two Hadamards.
+order: 2
+cells:
+  - kind: markdown
+    source: |
+      Two Hadamards in a row return the qubit to 0. A Z rotation of pi between them sends it to 1.
+
+      - In the second circuit, remove the RZ line and run again.
+      - Change `math.pi` to `math.pi / 2`. Which probabilities do you get?
+  - kind: code
+    source: |
+      import math
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, RZ, run
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      plain = QuantumCircuit(1)
+      plain.add_gate(Hadamard(), [0])
+      plain.add_gate(Hadamard(), [0])
+
+      phased = QuantumCircuit(1)
+      phased.add_gate(Hadamard(), [0])
+      phased.add_gate(RZ(math.pi), [0])
+      phased.add_gate(Hadamard(), [0])
+
+      plain_state = run(plain)
+      show(plain)
+      plot(plain_state)
+      print("H H        :", np.round(plain_state, 4))
+      phased_state = run(phased)
+      show(phased)
+      plot(phased_state)
+      print("H RZ(pi) H :", np.round(phased_state, 4))

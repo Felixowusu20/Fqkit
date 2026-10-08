@@ -1,0 +1,137 @@
+---
+title: "1. Deutsch's algorithm"
+description: Decide whether a one-bit function is constant or balanced with one query, from the classical problem to phase kickback.
+---
+
+# 1. Deutsch's algorithm
+
+Deutsch's algorithm answers one yes-or-no question about a function, using the
+function once. Classically the same question needs two uses.
+
+## The problem
+
+You are given a function $f$ from one bit to one bit. There are four such
+functions:
+
+| $f(0)$ | $f(1)$ | Kind |
+| --- | --- | --- |
+| 0 | 0 | constant |
+| 1 | 1 | constant |
+| 0 | 1 | balanced |
+| 1 | 0 | balanced |
+
+**Constant** means $f(0) = f(1)$. **Balanced** means $f(0) \neq f(1)$. You may
+call $f$, but you may not read its source. The question is only which kind it
+is, not the full table.
+
+Classically, one call gives you a single output. `0` is compatible with both
+kinds, so you must call $f$ a second time.
+
+## The principle
+
+Prepare a second qubit in the state <Math tex="(|0\rangle - |1\rangle)/\sqrt{2}" />, often
+written $|-\rangle$. Writing $f(x)$ onto that qubit by XOR does not change the
+bit you later read. It multiplies the input branch $|x\rangle$ by
+<Math tex="(-1)^{f(x)}" />.
+
+That is **phase kickback**, and it is the interference lesson in disguise. A
+phase you cannot see on one amplitude becomes visible when a Hadamard adds the
+branches together.
+
+- If $f$ is constant, both branches get the same sign. They interfere back to
+  $|0\rangle$.
+- If $f$ is balanced, the branches get opposite signs. They interfere to
+  $|1\rangle$.
+
+One query. The first qubit is then `0` for constant and `1` for balanced.
+
+## From the simple case to the harder one
+
+The simple case is $f(x) = 0$. The oracle does nothing. Two Hadamards on the
+input qubit cancel, exactly as in the interference lesson, and the answer bit
+is `0`.
+
+The next case is $f(x) = 1$. The oracle flips the ancilla. On $|-\rangle$ a
+flip is only a global phase, shared by both branches, so the answer bit is
+still `0`. Both constant functions behave the same, which is what we want: the
+algorithm reports the kind, not the values.
+
+The harder case is a balanced function, $f(x) = x$. The oracle is a CNOT from
+the input qubit to the ancilla. Kickback puts a minus sign on $|1\rangle$ only.
+The final Hadamard then returns `1`.
+
+The other balanced function, $f(x) = 1 - x$, is the same CNOT with an extra
+flip of the ancilla on either side. The answer bit is still `1`. That is the
+exercise below; the worked example does $f(x) = x$.
+
+## A worked example
+
+Qubit 0 is the input. Qubit 1 is the ancilla. `RX(π)` is a bit flip. This drawing is the balanced case, `f(x) = x`.
+
+<Circuit spec="RX pi 1; H 0; H 1; CNOT 0 1; H 0" caption="Deutsch's algorithm for the balanced function f(x) = x." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, CNOT, RX, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def deutsch(kind):
+    qc = QuantumCircuit(2)
+    qc.add_gate(RX(math.pi), [1])     # ancilla starts in |1>
+    qc.add_gate(Hadamard(), [0])
+    qc.add_gate(Hadamard(), [1])      # input |+>, ancilla |->
+
+    if kind == "constant-one":
+        qc.add_gate(RX(math.pi), [1])
+    elif kind == "balanced":
+        qc.add_gate(CNOT(), [0, 1])   # f(x) = x
+
+    qc.add_gate(Hadamard(), [0])
+    probabilities = np.abs(run(qc)) ** 2
+    # Qubit 0 is the leftmost bit, so it is 1 on outcomes 10 and 11.
+    return round(float(probabilities[2] + probabilities[3]), 4)
+
+for kind in ("constant-zero", "constant-one", "balanced"):
+    answer = deutsch(kind)
+    print(f"{kind:14}  P(answer bit = 1) = {answer}")
+```
+
+```text
+constant-zero   P(answer bit = 1) = 0.0
+constant-one    P(answer bit = 1) = 0.0
+balanced        P(answer bit = 1) = 1.0
+```
+
+`0.0` means constant. `1.0` means balanced. There is no sampling noise: the
+probability is exact.
+
+## Problems
+
+1. Implement $f(x) = 1 - x$ as a flip of the ancilla, then a CNOT, then
+   another flip. Run `deutsch` on it. Which kind does the answer bit report,
+   and why is that the correct kind?
+2. Delete the Hadamard on the ancilla and rerun the balanced case. The answer
+   bit is no longer certain. Which principle did you remove?
+3. A friend says the algorithm computed $f(0)$ and $f(1)$ "in parallel" and
+   then subtracted them. Using the constant-one case, explain why the output
+   is not the value of $f$.
+
+## Where it is used
+
+Deutsch's problem is a teaching problem. Nobody ships a product that only
+checks whether a one-bit function is constant. The reason it is still the
+first algorithm in a course is that the mechanism is the one later algorithms
+scale up:
+
+- **Deutsch-Jozsa** asks the same constant-or-balanced question for functions
+  of many bits, still with one query.
+- **Phase kickback** is how a reversible oracle writes an answer into a phase.
+  Shor's period-finding uses that idea on a much larger superposition.
+- In a laboratory it is a calibration circuit: if this small interference
+  experiment does not return a certain bit, the device is not ready for a
+  larger algorithm.
+
+Next: [Bernstein-Vazirani](/docs/algorithms/bernstein-vazirani), which learns
+not only the kind of the function but the hidden string inside it.

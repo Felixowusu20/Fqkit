@@ -19,6 +19,7 @@ from fqkit.core.parameter_binding import bind_parameters
 from fqkit.core.simulator import run, apply_gate
 from fqkit.core.measurement import measure_all
 from fqkit.core.qasm import to_qasm
+from fqkit.core.draw import draw, plot
 
 __all__ = [
     "Qubit",
@@ -39,4 +40,6 @@ __all__ = [
     "apply_gate",
     "measure_all",
     "to_qasm",
+    "draw",
+    "plot",
 ]

@@ -1,0 +1,81 @@
+---
+title: '1. Chemistry'
+description: Estimate the energy of a two-qubit toy molecule, then see how that same score becomes a chemistry calculation.
+---
+
+# 1. Chemistry
+
+A chemist often wants one number: the energy of a molecule in its most stable arrangement. That number decides whether a bond holds, how long it is, and whether a reaction is likely. For a large molecule the classical calculation of that number becomes the expensive part of the work.
+
+## The question
+
+Given a recipe for the energy, which quantum state has the lowest score?
+
+The recipe used here is a toy, chosen so every term is visible:
+
+<Equation tex="E = 0.4\langle Z_0 \rangle + 0.4\langle Z_1 \rangle + 0.2\langle Z_0 Z_1 \rangle" />
+
+Each average is read from probabilities. For one qubit, <Math tex="\langle Z \rangle = P(0) - P(1)" />. On two qubits, with qubit 0 as the left bit:
+
+- <Math tex="\langle Z_0 \rangle" /> compares the left bit 0 against the left bit 1.
+- <Math tex="\langle Z_1 \rangle" /> compares the right bit 0 against the right bit 1.
+- <Math tex="\langle Z_0 Z_1 \rangle" /> compares the outcomes where the bits agree against the outcomes where they differ.
+
+## The quantum idea
+
+The circuit is a guess at the molecule's state. The measurement is a score. You keep the guess with the lower score. That loop is the variational quantum eigensolver, written out for one qubit on the [variational algorithms](/docs/algorithms/variational-algorithms) page. Here the guess has two qubits, so you can see a product state and an entangled state side by side.
+
+## A toy you can run
+
+Three guesses. The product state leaves both qubits at 0. The Bell state entangles them. The third guess flips both qubits with <Math tex="\mathrm{RX}(\pi)" />.
+
+<Circuit spec="RX pi 0; RX pi 1" caption="Both qubits flipped. This guess has the lowest energy of the three." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, RX, CNOT, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def energy(build):
+    qc = QuantumCircuit(2)
+    build(qc)
+    p = np.abs(run(qc)) ** 2
+    z0 = (p[0] + p[1]) - (p[2] + p[3])
+    z1 = (p[0] + p[2]) - (p[1] + p[3])
+    zz = (p[0] + p[3]) - (p[1] + p[2])
+    return float(0.4 * z0 + 0.4 * z1 + 0.2 * zz)
+
+def product(qc):
+    return None
+
+def bell(qc):
+    qc.add_gate(Hadamard(), [0])
+    qc.add_gate(CNOT(), [0, 1])
+
+def both_flipped(qc):
+    qc.add_gate(RX(math.pi), [0])
+    qc.add_gate(RX(math.pi), [1])
+
+for name, build in (("product", product), ("bell", bell), ("both flipped", both_flipped)):
+    print(f"{name:14s} E = {energy(build): .1f}")
+```
+
+```text
+product        E =  1.0
+bell           E =  0.2
+both flipped   E = -0.6
+```
+
+The flipped state wins. Entanglement was available and, for this particular recipe, it was not the lowest score. That is a useful result: a famous state is not automatically the answer. The method is to score the guesses you can prepare.
+
+## Follow up
+
+1. In the [chemistry notebook](/notebooks/chemistry), add an `RY` on qubit 0 before the flips and print the energy at a few angles. Which angle undercuts <Math tex="-0.6" />? If none does, say so.
+2. Read [variational algorithms](/docs/algorithms/variational-algorithms) for the one-qubit case, where the score is <Math tex="\cos\theta" /> and the minimum is obvious.
+3. Real molecular Hamiltonians are long sums of Pauli strings, not three terms. The circuit can stay small. The number of separate experiments grows with the number of terms.
+
+## The real scale
+
+A hydrogen molecule in a minimal basis is already a research calculation: many terms, a layered circuit, and a classical optimizer choosing the angles. Drug-binding estimates and battery materials are the same loop with a larger recipe. FQkit will show you the loop. It will not fit a protein.

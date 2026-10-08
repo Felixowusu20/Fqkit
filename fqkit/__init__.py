@@ -32,9 +32,11 @@ from fqkit.core import (
     apply_gate,
     measure_all,
     to_qasm,
+    draw,
+    plot,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.3"
 
 __all__ = [
     "Qubit",
@@ -55,5 +57,7 @@ __all__ = [
     "apply_gate",
     "measure_all",
     "to_qasm",
+    "draw",
+    "plot",
     "__version__",
 ]

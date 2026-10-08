@@ -1,27 +1,1262 @@
+html[data-banner='off'] .fqkit-banner {
+  display: none;
+}
+
+.fqkit-banner-close {
+  flex: none;
+  margin-inline-end: 4px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.fqkit-banner-close:hover {
+  opacity: 1;
+}
+
 .fqkit-logo {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 9px;
   min-width: 0;
 }
 
+.fqkit-mark {
+  display: block;
+  flex: none;
+  width: 36px;
+  height: 36px;
+}
+
+html.dark .fqkit-logo .fqkit-mark-bolt path {
+  fill: #f4f1ea;
+}
+
+html.dark .fqkit-logo .fqkit-mark-bolt path.fqkit-mark-shade {
+  fill: #8d887f;
+}
+
 .fqkit-logo-mark {
-  font-size: 18px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
   white-space: nowrap;
 }
 
-.fqkit-logo-tagline {
-  opacity: 0.6;
+.fqkit-theme-switch {
+  margin-inline-start: 4px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* The column layout makes each child a flex item. Without this, a wide
+   code block or table stops the page from shrinking to a phone screen. */
+body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.fqkit-footer {
+  box-sizing: border-box;
+  width: min(100%, var(--nextra-content-width));
+  margin-top: auto;
+  margin-inline: auto;
+  padding: 20px 24px 28px;
+  border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  font-size: 14px;
+  opacity: 0.55;
+}
+
+body:has(.lesson-shell) .fqkit-footer {
+  width: min(100%, var(--nextra-content-width));
+  padding-inline: 24px;
+}
+
+.home {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+}
+
+.home-kicker,
+.notebook-kicker {
+  margin: 0 0 8px;
   font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
 }
 
-/* Match Nextra's mobile breakpoint: below `md` the nav links + search collapse
-   into the hamburger, so drop the tagline to keep the logo from overflowing. */
-@media (max-width: 767px) {
-  .fqkit-logo-tagline {
+.home h1 {
+  margin: 0 0 12px;
+  font-size: 64px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.home-lead,
+.notebook-lead {
+  max-width: 640px;
+  margin: 0 0 28px;
+  font-size: 18px;
+  line-height: 1.55;
+  opacity: 0.78;
+}
+
+.home-circuits,
+.notebook-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-circuit,
+.notebook-cards a {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-circuit span,
+.notebook-cards span {
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.home-circuits {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-circuit {
+  background: color-mix(in srgb, currentColor 3%, transparent);
+}
+
+.home-circuit:hover {
+  border-color: #1a73e8;
+}
+
+.home-circuit .circuit-figure {
+  margin: 0 0 6px;
+}
+
+.home-circuit .circuit-svg {
+  width: 100%;
+}
+
+.home-circuit strong {
+  font-size: 18px;
+}
+
+.circuit-figure {
+  margin: 10px 0 16px;
+  max-width: 100%;
+}
+
+.media-figure {
+  margin: 1.25rem 0 1.5rem;
+  max-width: 100%;
+}
+
+.media-figure img,
+.media-figure .media-video-file {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor 3%, transparent);
+}
+
+.media-figure figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.75;
+  text-align: center;
+}
+
+.media-align-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.media-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.media-align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.media-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  background: #0b0b0c;
+}
+
+.media-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.circuit-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  color: #202124;
+}
+
+.circuit-svg .circuit-panel {
+  fill: #ffffff;
+  stroke: #e4e7eb;
+}
+
+.circuit-svg .wire,
+.circuit-svg .wire-end,
+.circuit-svg .target,
+.circuit-svg .target-mark line {
+  stroke: #3c4043;
+  stroke-width: 1.7;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.circuit-svg .box {
+  fill: #e8f0fe;
+  stroke: #1a73e8;
+  stroke-width: 1.6;
+}
+
+.circuit-svg .label {
+  fill: #174ea6;
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.circuit-svg .qlabel {
+  fill: #5f6368;
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.circuit-svg .dot-halo {
+  fill: #ffffff;
+}
+
+.circuit-svg .dot {
+  fill: #202124;
+}
+
+html.dark .circuit-svg {
+  color: #e8eaed;
+}
+
+html.dark .circuit-svg .circuit-panel,
+html.dark .circuit-svg .dot-halo {
+  fill: #292a2d;
+  stroke: #3c4043;
+}
+
+html.dark .circuit-svg .wire,
+html.dark .circuit-svg .wire-end,
+html.dark .circuit-svg .target,
+html.dark .circuit-svg .target-mark line,
+html.dark .circuit-svg .dot {
+  stroke: #e8eaed;
+  fill: #e8eaed;
+}
+
+html.dark .circuit-svg .target {
+  fill: none;
+}
+
+html.dark .circuit-svg .box {
+  fill: #174ea6;
+  stroke: #8ab4f8;
+}
+
+html.dark .circuit-svg .label {
+  fill: #d2e3fc;
+}
+
+html.dark .circuit-svg .qlabel {
+  fill: #bdc1c6;
+}
+
+.circuit-caption,
+.notebook-hint {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.7;
+}
+
+.circuit-error {
+  margin: 8px 0 0;
+  color: #c24141;
+  font-size: 14px;
+}
+
+.lesson-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  padding: 16px 20px 32px 16px;
+}
+
+.lesson-shell.is-collapsed {
+  grid-template-columns: 44px minmax(0, 1fr);
+  padding-left: 8px;
+}
+
+.lesson-sidebar {
+  position: sticky;
+  top: 72px;
+  padding: 6px 16px 12px 0;
+  border-right: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.lesson-collapse {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  margin-left: auto;
+  padding: 0 8px 0 6px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lesson-collapse-mark {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.lesson-collapse:hover {
+  border-color: #1a73e8;
+}
+
+.lesson-shell.is-collapsed .lesson-sidebar-label,
+.lesson-shell.is-collapsed .lesson-sidebar strong,
+.lesson-shell.is-collapsed .lesson-sidebar-empty,
+.lesson-shell.is-collapsed .lesson-sidebar nav {
+  display: none;
+}
+
+.lesson-shell.is-collapsed .lesson-sidebar {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.lesson-shell.is-collapsed .lesson-sidebar-head {
+  justify-content: center;
+  margin-bottom: 0;
+  padding-right: 0;
+}
+
+.lesson-shell.is-collapsed .lesson-collapse {
+  width: 28px;
+  margin-left: 0;
+  padding: 0;
+  justify-content: center;
+}
+
+.lesson-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-right: 4px;
+}
+
+.lesson-sidebar-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.lesson-count,
+.lesson-sidebar-empty {
+  font-size: 12px;
+  opacity: 0.45;
+}
+
+.lesson-sidebar-empty {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.lesson-sidebar ol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lesson-sidebar a {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 8px 7px 0;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.lesson-sidebar a:hover strong {
+  opacity: 1;
+}
+
+.lesson-sidebar strong {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.82;
+}
+
+.lesson-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.lesson-sidebar a[aria-current='page'] strong {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.lesson-sidebar a[aria-current='page'] .lesson-num {
+  border-color: #1a73e8;
+  background: #1a73e8;
+  color: #fff;
+  opacity: 1;
+}
+
+.lesson-main {
+  min-width: 0;
+  padding: 4px 0 0 20px;
+}
+
+.lesson-shell.is-collapsed .lesson-main {
+  padding-left: 12px;
+}
+
+.lesson-start h1,
+.lesson-head h1 {
+  margin: 0 0 8px;
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lesson-start .notebook-lead,
+.lesson-head .notebook-lead {
+  margin-bottom: 0;
+}
+
+.notebook-kicker {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.notebook-kicker a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.notebook-kicker a:hover {
+  text-decoration: underline;
+}
+
+.notebook-kicker span {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.7;
+}
+
+.lesson-start-card,
+.lesson-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+  background: color-mix(in srgb, #1a73e8 7%, transparent);
+}
+
+.lesson-start-card:hover,
+.lesson-next:hover {
+  border-color: #1a73e8;
+}
+
+.lesson-start-card small,
+.lesson-next small {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.lesson-start-card strong,
+.lesson-next strong {
+  display: block;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.lesson-start-card em {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1.4;
+  opacity: 0.7;
+}
+
+.lesson-go {
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.lesson-done {
+  margin: 28px 0 0;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.notebook {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notebook-cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.notebook-work {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.notebook-editor label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.notebook-editor textarea {
+  width: 100%;
+  min-height: 240px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  background: transparent;
+  color: inherit;
+  font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+
+.notebook-run {
+  margin-top: 12px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #2f6feb;
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.notebook-run:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.prob-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.prob-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 48px auto;
+  gap: 8px;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+
+.prob-label,
+.prob-count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.prob-track {
+  display: block;
+  height: 8px;
+  border-radius: 99px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  overflow: hidden;
+}
+
+.prob-track span {
+  display: block;
+  height: 100%;
+  background: #2f6feb;
+}
+
+.notebook-next {
+  margin-top: 28px;
+}
+
+.nb {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.nb-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+}
+
+.nb-toolbar .notebook-hint {
+  margin: 0;
+}
+
+.nb-cell {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.nb-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+.nb-play {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nb-play:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nb-play-quiet {
+  width: auto;
+  height: auto;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.nb-prompt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.nb-editor {
+  width: 100%;
+  min-height: 180px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #2f6feb 45%, transparent);
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  color: inherit;
+  font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+
+.nb-editor-text {
+  min-height: 90px;
+  border-color: color-mix(in srgb, currentColor 20%, transparent);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.nb-markdown p,
+.nb-markdown ul {
+  margin: 0 0 8px;
+}
+
+.nb-markdown code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+}
+
+.nb-output {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.nb-output pre {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.nb-output .circuit-figure {
+  margin: 4px 0 8px;
+}
+
+.nb-output-error pre {
+  color: #c24141;
+}
+
+.nb-cell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.nb-cell-actions button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  opacity: 0.62;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .home {
+    padding: 28px 16px 48px;
+  }
+
+  .home h1 {
+    font-size: 40px;
+  }
+
+  .home-lead,
+  .notebook-lead {
+    font-size: 16px;
+  }
+
+  .fqkit-footer,
+  body:has(.lesson-shell) .fqkit-footer {
+    padding-inline: 16px;
+  }
+
+  .lesson-shell,
+  .lesson-shell.is-collapsed {
+    padding: 12px 12px 28px;
+  }
+
+  .home-circuits,
+  .notebook-cards,
+  .notebook-work,
+  .lesson-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-sidebar {
+    position: static;
+    margin-bottom: 8px;
+    padding: 0 0 16px;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  }
+
+  .lesson-shell.is-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-shell.is-collapsed .lesson-sidebar nav {
     display: none;
+  }
+
+  .lesson-shell.is-collapsed .lesson-sidebar {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .lesson-main,
+  .lesson-shell.is-collapsed .lesson-main {
+    padding: 18px 0 0;
+  }
+
+  .lesson-start h1,
+  .lesson-head h1 {
+    font-size: 32px;
+  }
+}
+
+.notebook {
+  max-width: none;
+}
+
+.colab-sheet {
+  --colab-paper: #f7f7f7;
+  --colab-surface: #fff;
+  --colab-ink: #202124;
+  --colab-muted: #5f6368;
+  --colab-line: #e0e0e0;
+  --colab-blue: #1a73e8;
+  --colab-select: #e8f0fe;
+  margin-top: 8px;
+  padding: 8px 4px 20px;
+  border-radius: 12px;
+  background: var(--colab-paper);
+  color: var(--colab-ink);
+}
+
+html.dark .colab-sheet {
+  --colab-paper: #202124;
+  --colab-surface: #292a2d;
+  --colab-ink: #e8eaed;
+  --colab-muted: #9aa0a6;
+  --colab-line: #3c4043;
+  --colab-blue: #8ab4f8;
+  --colab-select: #174ea6;
+}
+
+.colab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  padding: 4px 12px 8px 64px;
+}
+
+.colab-bar p {
+  margin: 0;
+  color: var(--colab-muted);
+  font-size: 13px;
+}
+
+.colab-runall,
+.colab-insert-actions button,
+.colab-tools button {
+  border: 1px solid var(--colab-line);
+  background: var(--colab-surface);
+  color: var(--colab-ink);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.colab-runall {
+  padding: 7px 14px;
+  font-weight: 650;
+  color: var(--colab-blue);
+  border-color: transparent;
+  background: var(--colab-select);
+}
+
+.colab-runall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.colab-insert {
+  position: relative;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 56px;
+}
+
+.colab-insert-line {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.colab-insert-actions {
+  position: relative;
+  display: none;
+  gap: 6px;
+}
+
+.colab-insert:hover .colab-insert-actions,
+.colab-insert:focus-within .colab-insert-actions {
+  display: flex;
+}
+
+.colab-insert:hover .colab-insert-line,
+.colab-insert:focus-within .colab-insert-line {
+  background: var(--colab-blue);
+}
+
+.colab-insert-actions button,
+.colab-tools button {
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.colab-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 4px;
+  align-items: start;
+}
+
+.colab-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.colab-play {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--colab-line);
+  background: var(--colab-surface);
+  color: var(--colab-muted);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+}
+
+.colab-play:hover:not(:disabled) {
+  background: var(--colab-select);
+  color: var(--colab-blue);
+  border-color: transparent;
+}
+
+.colab-play:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.colab-prompt {
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--colab-muted);
+}
+
+.colab-card {
+  position: relative;
+  min-width: 0;
+  background: var(--colab-surface);
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.colab-row:hover .colab-card,
+.colab-row:focus-within .colab-card {
+  border-color: var(--colab-line);
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.12), 0 1px 3px rgba(60, 64, 67, 0.08);
+}
+
+.colab-row:focus-within .colab-card {
+  border-color: var(--colab-blue);
+}
+
+.colab-tools {
+  position: absolute;
+  top: -16px;
+  right: 10px;
+  z-index: 3;
+  display: none;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--colab-line);
+  border-radius: 8px;
+  background: var(--colab-surface);
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.2);
+}
+
+.colab-row:hover .colab-tools,
+.colab-row:focus-within .colab-tools {
+  display: flex;
+}
+
+.colab-tools button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+}
+
+.colab-tools button:hover:not(:disabled) {
+  background: var(--colab-select);
+  color: var(--colab-blue);
+}
+
+.colab-tools button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.colab-markdown,
+.colab-text-editor {
+  padding: 12px 16px 8px;
+  color: var(--colab-ink);
+}
+
+.colab-text-editor {
+  width: 100%;
+  min-height: 88px;
+  border: 0;
+  resize: vertical;
+  background: transparent;
+  color: inherit;
+  font: 15px/1.5 Roboto, ui-sans-serif, system-ui, sans-serif;
+}
+
+.colab-markdown p,
+.colab-markdown ul {
+  margin: 0 0 8px;
+}
+
+.colab-markdown code {
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+}
+
+.colab-output {
+  border-top: 1px solid var(--colab-line);
+  padding: 8px 16px 12px;
+}
+
+.colab-output-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.colab-output-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--colab-muted, #5f6368);
+  font: 12px/1 "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.colab-output-actions button:hover {
+  color: var(--colab-ink, #202124);
+}
+
+.colab-output pre {
+  margin: 8px 0;
+  white-space: pre-wrap;
+  font: 13px/1.5 "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--colab-ink);
+}
+
+.colab-traceback {
+  color: #c5221f;
+}
+
+.bar-chart {
+  margin: 12px 0;
+  padding: 12px 14px 10px;
+  max-width: 560px;
+  border: 1px solid var(--colab-line, #e4e7eb);
+  border-radius: 10px;
+  background: var(--colab-surface, #fff);
+}
+
+.bar-chart figcaption {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--colab-muted, #5f6368);
+}
+
+.bar-chart-plot {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.bar-chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bar-chart-track {
+  display: flex;
+  align-items: end;
+  width: 100%;
+  height: 110px;
+  border-radius: 6px 6px 2px 2px;
+  background: color-mix(in srgb, var(--colab-blue, #1a73e8) 8%, transparent);
+}
+
+.bar-chart-fill {
+  width: 100%;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #8ab4f8, #1a73e8);
+}
+
+.bar-chart-pct,
+.bar-chart-label {
+  font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--colab-muted, #5f6368);
+}
+
+.cm-tooltip-autocomplete {
+  z-index: 30;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: #fff;
+  color: #202124;
+  box-shadow: 0 4px 16px rgba(60, 64, 67, 0.18);
+  font-family: Roboto, ui-sans-serif, system-ui, sans-serif;
+}
+
+.cm-tooltip-autocomplete ul li[aria-selected] {
+  background: #e8f0fe;
+  color: #174ea6;
+}
+
+html.dark .cm-tooltip-autocomplete {
+  border-color: #5f6368;
+  background: #292a2d;
+  color: #e8eaed;
+}
+
+html.dark .cm-tooltip-autocomplete ul li[aria-selected] {
+  background: #174ea6;
+  color: #d2e3fc;
+}
+
+@media (max-width: 720px) {
+  .colab-bar {
+    padding: 4px 12px 8px;
+  }
+
+  .colab-insert {
+    margin-left: 0;
+  }
+
+  .colab-insert-actions {
+    display: flex;
+  }
+
+  .colab-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .colab-tools {
+    display: flex;
+    top: 4px;
+    right: 6px;
+  }
+
+  .katex-display,
+  .circuit-svg,
+  .circuit-figure,
+  .media-figure,
+  .bar-chart {
+    max-width: 100%;
+  }
+
+  .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 }

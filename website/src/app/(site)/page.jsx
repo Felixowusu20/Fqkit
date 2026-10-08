@@ -1,70 +1,66 @@
-const btnBase = {
-  display: 'inline-block',
-  padding: '11px 22px',
-  borderRadius: 10,
-  fontSize: 15,
-  fontWeight: 600,
-  textDecoration: 'none'
+import { CircuitDiagram } from '../../../components/circuit-diagram'
+
+export const metadata = {
+  title: { absolute: 'FQkit' },
+  description: 'A small Python toolkit for learning quantum circuits.'
 }
+
+const routes = [
+  {
+    href: '/docs/tutorials',
+    title: 'Lessons',
+    text: 'Superposition, interference, and entanglement.',
+    spec: 'H 0',
+    caption: 'One Hadamard'
+  },
+  {
+    href: '/docs/algorithms',
+    title: 'Algorithms',
+    text: 'Deutsch, Bernstein-Vazirani, Grover, and variational methods.',
+    spec: 'H 0; H 1; CZ 0 1',
+    caption: 'Mark a state'
+  },
+  {
+    href: '/docs/applications',
+    title: 'Applications',
+    text: 'Chemistry, telecommunications, physics, and cryptography.',
+    spec: 'H 0; CNOT 0 1; RZ pi 0',
+    caption: 'A shared pair'
+  },
+  {
+    href: '/notebooks',
+    title: 'Notebooks',
+    text: 'Write Python, run the cell, and read the result.',
+    spec: 'H 0; CNOT 0 1',
+    caption: 'A Bell state'
+  },
+  {
+    href: '/docs/gates',
+    title: 'Gates',
+    text: 'Every gate FQkit can draw and apply.',
+    spec: 'H 0; CNOT 0 1; SWAP 1 2',
+    caption: 'Hadamard, CNOT, SWAP'
+  }
+]
 
 export default function HomePage() {
   return (
-    <div
-      style={{
-        maxWidth: 780,
-        margin: '0 auto',
-        padding: '15vh 24px 10vh',
-        textAlign: 'center'
-      }}
-    >
-      <div style={{ fontSize: 60, lineHeight: 1, marginBottom: 16 }}>⚛</div>
-      <h1
-        style={{
-          fontSize: 60,
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
-          margin: '0 0 14px'
-        }}
-      >
-        FQkit
-      </h1>
-      <p
-        style={{
-          fontSize: 20,
-          opacity: 0.72,
-          margin: '0 auto 34px',
-          lineHeight: 1.55,
-          maxWidth: 620
-        }}
-      >
-        A lightweight quantum circuit framework for learning and simulation —
-        built for Africa and the world.
+    <main className="home">
+      <p className="home-kicker">Quantum circuits in Python</p>
+      <h1>FQkit</h1>
+      <p className="home-lead">
+        A small toolkit for learning quantum circuits. Pick a circuit to open
+        that part of the site.
       </p>
-      <div
-        style={{
-          display: 'flex',
-          gap: 12,
-          justifyContent: 'center',
-          flexWrap: 'wrap'
-        }}
-      >
-        <a href="/docs" style={{ ...btnBase, background: '#2f6feb', color: '#fff' }}>
-          Get started →
-        </a>
-        <a
-          href="https://github.com/Felixowusu20/Fqkit"
-          style={{
-            ...btnBase,
-            border: '1px solid rgba(125,125,125,0.4)',
-            color: 'inherit'
-          }}
-        >
-          GitHub
-        </a>
-      </div>
-      <p style={{ marginTop: 48, opacity: 0.5, fontSize: 14 }}>
-        Free &amp; open source · Pure Python + NumPy · Exports to OpenQASM
-      </p>
-    </div>
+      <nav className="home-circuits" aria-label="Sections">
+        {routes.map(route => (
+          <a key={route.href} href={route.href} className="home-circuit">
+            <CircuitDiagram spec={route.spec} caption={route.caption} />
+            <strong>{route.title}</strong>
+            <span>{route.text}</span>
+          </a>
+        ))}
+      </nav>
+    </main>
   )
 }

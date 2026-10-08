@@ -1,36 +1,265 @@
 import { config, collection, fields } from '@keystatic/core'
+import { FqkitMark } from './components/fqkit-mark.js'
+import { block, inline, wrapper } from '@keystatic/core/content-components'
+
+// Docs and tutorials use <Callout> in MDX. Keystatic refuses to open a page
+// until every JSX component in the body has a matching definition.
+const Callout = wrapper({
+  label: 'Callout',
+  schema: {
+    type: fields.select({
+      label: 'Type',
+      options: [
+        { label: 'Default', value: 'default' },
+        { label: 'Info', value: 'info' },
+        { label: 'Warning', value: 'warning' },
+        { label: 'Error', value: 'error' },
+        { label: 'Important', value: 'important' }
+      ],
+      defaultValue: 'default'
+    })
+  }
+})
+
+// Keystatic's MDX parser treats { } as JavaScript, so LaTeX cannot live in
+// raw $$ blocks. These components keep the TeX in a quoted attribute.
+const equationSchema = {
+  tex: fields.text({
+    label: 'LaTeX',
+    multiline: true
+  })
+}
+
+const Equation = block({
+  label: 'Equation',
+  schema: equationSchema
+})
+
+const Math = inline({
+  label: 'Inline math',
+  schema: equationSchema
+})
+
+const Circuit = block({
+  label: 'Circuit diagram',
+  schema: {
+    spec: fields.text({
+      label: 'Gates',
+      description: 'One gate per line, or separated by semicolons. Example: H 0; CNOT 0 1',
+      multiline: true
+    }),
+    caption: fields.text({
+      label: 'Caption',
+      validation: { isRequired: false }
+    })
+  }
+})
+
+function mediaSizeField() {
+  return fields.select({
+    label: 'Size',
+    description: 'How wide the media appears in the lesson.',
+    options: [
+      { label: 'Extra small', value: 'xs' },
+      { label: 'Small', value: 'small' },
+      { label: 'Medium', value: 'medium' },
+      { label: 'Large', value: 'large' },
+      { label: 'Full width', value: 'full' }
+    ],
+    defaultValue: 'medium'
+  })
+}
+
+function mediaAlignField() {
+  return fields.select({
+    label: 'Alignment',
+    options: [
+      { label: 'Left', value: 'left' },
+      { label: 'Center', value: 'center' },
+      { label: 'Right', value: 'right' }
+    ],
+    defaultValue: 'center'
+  })
+}
+
+const Image = block({
+  label: 'Image',
+  description: 'Upload a picture and set size, alignment, and caption.',
+  schema: {
+    src: fields.image({
+      label: 'Image',
+      description: 'Upload a PNG, JPG, WebP, or GIF for students.',
+      directory: 'public/images/content',
+      publicPath: '/images/content/'
+    }),
+    alt: fields.text({
+      label: 'Alt text',
+      description: 'Short description for accessibility and screen readers.',
+      validation: { isRequired: false }
+    }),
+    caption: fields.text({
+      label: 'Caption',
+      validation: { isRequired: false }
+    }),
+    size: mediaSizeField(),
+    align: mediaAlignField()
+  }
+})
+
+const Video = block({
+  label: 'Video',
+  description: 'Embed YouTube/Vimeo or upload a video file.',
+  schema: {
+    url: fields.text({
+      label: 'YouTube or Vimeo URL',
+      description: 'Paste a watch or share link. Example: https://www.youtube.com/watch?v=…',
+      validation: { isRequired: false }
+    }),
+    src: fields.file({
+      label: 'Or upload a video file',
+      description: 'MP4 or WebM stored in the repo (use for short clips).',
+      directory: 'public/videos',
+      publicPath: '/videos/'
+    }),
+    caption: fields.text({
+      label: 'Caption',
+      validation: { isRequired: false }
+    }),
+    size: mediaSizeField(),
+    align: mediaAlignField(),
+    controls: fields.checkbox({
+      label: 'Show playback controls',
+      description: 'Applies to uploaded video files (embeds always have controls).',
+      defaultValue: true
+    })
+  }
+})
 
 const pageSchema = {
-  title: fields.text({
-    label: 'Title',
-    validation: { isRequired: true }
+  title: fields.slug({
+    name: {
+      label: 'Title',
+      validation: { isRequired: true }
+    }
   }),
   description: fields.text({
     label: 'Description (shown in search results and SEO)',
     validation: { isRequired: false }
   }),
-  body: fields.mdx({ label: 'Content' })
+  body: fields.mdx({
+    label: 'Content',
+    options: {
+      image: {
+        directory: 'public/images/content',
+        publicPath: '/images/content/'
+      }
+    },
+    components: { Callout, Equation, Math, Circuit, Image, Video }
+  })
 }
 
+const collectionOptions = {
+  format: { contentField: 'body' },
+  slugField: 'title',
+  schema: pageSchema
+}
+
+// Local storage writes files on the machine running the server. Vercel’s
+// filesystem is read-only, so the deployed admin cannot list or save pages.
+// GitHub storage reads and writes the repository instead. pathPrefix is the
+// website folder, because collection paths are relative to that folder.
+// NEXT_PUBLIC_KEYSTATIC_STORAGE is set in next.config from VERCEL.
+// The admin page runs in the browser, and the browser cannot see VERCEL itself.
+const storage =
+  process.env.NEXT_PUBLIC_KEYSTATIC_STORAGE === 'github' || process.env.VERCEL
+    ? {
+        kind: 'github',
+        repo: 'Felixowusu20/Fqkit',
+        pathPrefix: 'website'
+      }
+    : { kind: 'local' }
+
 export default config({
-  storage: { kind: 'local' },
+  storage,
   ui: {
-    brand: { name: 'FQkit Docs' }
+    brand: { name: 'FQkit', mark: FqkitMark }
   },
   collections: {
     docs: collection({
       label: 'Docs pages',
       description: 'Reference pages under /docs',
       path: 'src/content/*',
-      format: { contentField: 'body' },
-      schema: pageSchema
+      ...collectionOptions
     }),
     tutorials: collection({
       label: 'Tutorials',
       description: 'Teaching lessons under /docs/tutorials',
       path: 'src/content/tutorials/*',
-      format: { contentField: 'body' },
-      schema: pageSchema
+      ...collectionOptions
+    }),
+    algorithms: collection({
+      label: 'Algorithms',
+      description: 'Algorithm lessons under /docs/algorithms',
+      path: 'src/content/algorithms/*',
+      ...collectionOptions
+    }),
+    applications: collection({
+      label: 'Applications',
+      description: 'Sector lessons under /docs/applications',
+      path: 'src/content/applications/*',
+      ...collectionOptions
+    }),
+    hardware: collection({
+      label: 'Hardware',
+      description: 'Runtime and job submission under /docs/hardware',
+      path: 'src/content/hardware/*',
+      ...collectionOptions
+    }),
+    notebooks: collection({
+      label: 'Lessons',
+      description: 'Practice lessons. Saving one publishes it in the sidebar on /notebooks.',
+      path: 'src/notebooks/*',
+      format: 'yaml',
+      previewUrl: '/notebooks/{slug}',
+      slugField: 'title',
+      schema: {
+        title: fields.slug({
+          name: {
+            label: 'Title',
+            validation: { isRequired: true }
+          }
+        }),
+        description: fields.text({
+          label: 'Short description',
+          validation: { isRequired: false }
+        }),
+        order: fields.integer({
+          label: 'Order',
+          defaultValue: 1,
+          description: 'Lower numbers appear first in the lesson sidebar.'
+        }),
+        cells: fields.array(
+          fields.object({
+            kind: fields.select({
+              label: 'Cell type',
+              options: [
+                { label: 'Text', value: 'markdown' },
+                { label: 'Python', value: 'code' }
+              ],
+              defaultValue: 'code'
+            }),
+            source: fields.text({
+              label: 'Cell contents',
+              description: 'Text for a text cell, or Python for a code cell. In Python, show(qc) draws the circuit.',
+              multiline: true
+            })
+          }),
+          {
+            label: 'Cells',
+            itemLabel: props => (props.fields.kind.value === 'markdown' ? 'Text' : 'Python')
+          }
+        )
+      }
     })
   }
 })
