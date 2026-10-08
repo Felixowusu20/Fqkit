@@ -55,6 +55,86 @@ const Circuit = block({
   }
 })
 
+function mediaSizeField() {
+  return fields.select({
+    label: 'Size',
+    description: 'How wide the media appears in the lesson.',
+    options: [
+      { label: 'Extra small', value: 'xs' },
+      { label: 'Small', value: 'small' },
+      { label: 'Medium', value: 'medium' },
+      { label: 'Large', value: 'large' },
+      { label: 'Full width', value: 'full' }
+    ],
+    defaultValue: 'medium'
+  })
+}
+
+function mediaAlignField() {
+  return fields.select({
+    label: 'Alignment',
+    options: [
+      { label: 'Left', value: 'left' },
+      { label: 'Center', value: 'center' },
+      { label: 'Right', value: 'right' }
+    ],
+    defaultValue: 'center'
+  })
+}
+
+const Image = block({
+  label: 'Image',
+  description: 'Upload a picture and set size, alignment, and caption.',
+  schema: {
+    src: fields.image({
+      label: 'Image',
+      description: 'Upload a PNG, JPG, WebP, or GIF for students.',
+      directory: 'public/images/content',
+      publicPath: '/images/content/'
+    }),
+    alt: fields.text({
+      label: 'Alt text',
+      description: 'Short description for accessibility and screen readers.',
+      validation: { isRequired: false }
+    }),
+    caption: fields.text({
+      label: 'Caption',
+      validation: { isRequired: false }
+    }),
+    size: mediaSizeField(),
+    align: mediaAlignField()
+  }
+})
+
+const Video = block({
+  label: 'Video',
+  description: 'Embed YouTube/Vimeo or upload a video file.',
+  schema: {
+    url: fields.text({
+      label: 'YouTube or Vimeo URL',
+      description: 'Paste a watch or share link. Example: https://www.youtube.com/watch?v=…',
+      validation: { isRequired: false }
+    }),
+    src: fields.file({
+      label: 'Or upload a video file',
+      description: 'MP4 or WebM stored in the repo (use for short clips).',
+      directory: 'public/videos',
+      publicPath: '/videos/'
+    }),
+    caption: fields.text({
+      label: 'Caption',
+      validation: { isRequired: false }
+    }),
+    size: mediaSizeField(),
+    align: mediaAlignField(),
+    controls: fields.checkbox({
+      label: 'Show playback controls',
+      description: 'Applies to uploaded video files (embeds always have controls).',
+      defaultValue: true
+    })
+  }
+})
+
 const pageSchema = {
   title: fields.slug({
     name: {
@@ -68,7 +148,13 @@ const pageSchema = {
   }),
   body: fields.mdx({
     label: 'Content',
-    components: { Callout, Equation, Math, Circuit }
+    options: {
+      image: {
+        directory: 'public/images/content',
+        publicPath: '/images/content/'
+      }
+    },
+    components: { Callout, Equation, Math, Circuit, Image, Video }
   })
 }
 
