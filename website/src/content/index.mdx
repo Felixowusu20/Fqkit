@@ -2,12 +2,15 @@
 title: Introduction
 description: What FQkit is and why it exists.
 ---
-
 # Introduction
+
+<Video url="https://youtu.be/xL383DseSpE" size="medium" align="center" controls />
 
 **FQkit** is a small Python framework for building and simulating quantum
 circuits. The source stays short on purpose, so you can learn how a quantum
 computer works by reading it and changing it.
+
+
 
 <Callout type="info">
   FQkit is free and open source. It depends only on Python and NumPy, and it can
@@ -24,26 +27,26 @@ a short module you can read. You can hold the whole thing in your head.
 
 ## Features
 
-- **Qubits and parameterized gates**: `H`, `RX`, `RY`, `RZ`
-- **Multi-qubit gates**: `CNOT`, `CZ`, `SWAP`, `Toffoli`
-- **Circuit construction**: `QuantumCircuit` with validation
-- **Parameter binding**: symbolic parameters for variational circuits
-- **Statevector simulator**: `run` returns the final quantum state
-- **Measurement**: `measure_all` samples bitstrings from the state
-- **OpenQASM 2.0 export**: `to_qasm` bridges to Qiskit and real hardware
-- **Hardware jobs**: `submit(qc, "ibm")` or `"ionq"`, `"rigetti"`, `"iqm"`, `"aqt"`
+* **Qubits and parameterized gates**: `H`, `RX`, `RY`, `RZ`
+* **Multi-qubit gates**: `CNOT`, `CZ`, `SWAP`, `Toffoli`
+* **Circuit construction**: `QuantumCircuit` with validation
+* **Parameter binding**: symbolic parameters for variational circuits
+* **Statevector simulator**: `run` returns the final quantum state
+* **Measurement**: `measure_all` samples bitstrings from the state
+* **OpenQASM 2.0 export**: `to_qasm` bridges to Qiskit and real hardware
+* **Hardware jobs**: `submit(qc, "ibm")` or `"ionq"`, `"rigetti"`, `"iqm"`, `"aqt"`
 
 ## How these docs are organized
 
-| Page | What you'll learn |
-| --- | --- |
-| [Installation](/docs/installation) | Getting FQkit onto your machine |
-| [Quick Start](/docs/quick-start) | Your first entangled circuit |
-| [Gates](/docs/gates) | The gate library and how gates work |
-| [Circuits](/docs/circuits) | Building circuits with `QuantumCircuit` |
-| [Simulation & Measurement](/docs/simulation-and-measurement) | Running circuits and reading results |
-| [Parameters & Binding](/docs/parameters) | Variational circuits |
-| [OpenQASM & Hardware](/docs/openqasm) | Exporting a circuit to OpenQASM |
-| [Hardware](/docs/hardware) | Accounts, runtime, job submission, and results |
-| [API Reference](/docs/api) | Every public function and class |
-| [Applications](/docs/applications) | Chemistry, telecommunications, physics, cryptography, and where to go next |
+| Page                                                         | What you'll learn                                                          |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| [Installation](/docs/installation)                           | Getting FQkit onto your machine                                            |
+| [Quick Start](/docs/quick-start)                             | Your first entangled circuit                                               |
+| [Gates](/docs/gates)                                         | The gate library and how gates work                                        |
+| [Circuits](/docs/circuits)                                   | Building circuits with `QuantumCircuit`                                    |
+| [Simulation & Measurement](/docs/simulation-and-measurement) | Running circuits and reading results                                       |
+| [Parameters & Binding](/docs/parameters)                     | Variational circuits                                                       |
+| [OpenQASM & Hardware](/docs/openqasm)                        | Exporting a circuit to OpenQASM                                            |
+| [Hardware](/docs/hardware)                                   | Accounts, runtime, job submission, and results                             |
+| [API Reference](/docs/api)                                   | Every public function and class                                            |
+| [Applications](/docs/applications)                           | Chemistry, telecommunications, physics, cryptography, and where to go next |
