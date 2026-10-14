@@ -227,6 +227,13 @@ FQkit uses **big-endian** qubit ordering: qubit 0 is the most significant bit
 of the state-vector index, and the first qubit passed to a multi-qubit gate is
 its most significant qubit (for `CNOT`, the control).
 
+## Contributing
+
+We are prioritizing classical-simulator correctness and research usefulness.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the task board in
+[docs/simulator-tasks.md](docs/simulator-tasks.md). Use the **Simulator task**
+GitHub issue template to claim work.
+
 ## Testing
 
 FQkit ships with a `pytest` suite covering the simulator, every gate, parameter
