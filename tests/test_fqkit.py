@@ -131,8 +131,8 @@ def test_parameter_binding_rx():
     theta = Parameter("theta")
     qc = QuantumCircuit(1)
     qc.add_gate(RX(theta), [0])
-    bind_parameters(qc, {"theta": np.pi})
-    assert np.allclose(probs(run(qc)), [0, 1])   # RX(pi)|0> = -i|1>
+    bound = bind_parameters(qc, {"theta": np.pi})
+    assert np.allclose(probs(run(bound)), [0, 1])   # RX(pi)|0> = -i|1>
 
 
 def test_unbound_parameter_raises_clear_error():

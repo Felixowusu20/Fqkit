@@ -40,7 +40,7 @@ def test_qasm3_rejects_unbound_parameter():
 def test_qasm3_writes_a_bound_angle():
     qc = QuantumCircuit(1)
     qc.add_gate(RX(Parameter("theta")), [0])
-    bind_parameters(qc, {"theta": 0.5})
+    qc = bind_parameters(qc, {"theta": 0.5})
     assert "rx(0.5) q[0];" in to_qasm3(qc)
 
 

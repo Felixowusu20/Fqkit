@@ -11,6 +11,9 @@ algorithms like VQE and QAOA.
 
 ## Define and bind
 
+Binding is **immutable by default**: you get a new circuit back, and the
+template keeps its symbols for the next angle.
+
 ```python
 from fqkit import (
     QuantumCircuit, Hadamard, RX, Parameter,
@@ -19,19 +22,20 @@ from fqkit import (
 
 theta = Parameter("theta")
 
-qc = QuantumCircuit(2)
-qc.add_gate(Hadamard(), [0])
-qc.add_gate(RX(theta), [1])
+template = QuantumCircuit(2)
+template.add_gate(Hadamard(), [0])
+template.add_gate(RX(theta), [1])
 
-# Bind the symbol to a number
-bind_parameters(qc, {"theta": 3.14159})
-
-counts = measure_all(run(qc), shots=1024)
-print(counts)
+bound = bind_parameters(template, {"theta": 3.14159})
+print(measure_all(run(bound), shots=1024, seed=1))
+# template is still unbound — safe to reuse
 ```
 
-`bind_parameters(circuit, values)` walks the circuit and replaces every
-`Parameter` whose name appears in `values` with the given number.
+Legacy in-place binding (mutates the circuit) is available if you need it:
+
+```python
+bind_parameters(qc, {"theta": 1.0}, inplace=True)
+```
 
 ## Unbound parameters
 

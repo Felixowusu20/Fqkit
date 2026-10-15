@@ -85,8 +85,8 @@ def energy(angle):
     theta = Parameter("theta")
     qc = QuantumCircuit(1)
     qc.add_gate(RY(theta), [0])
-    bind_parameters(qc, {"theta": angle})
-    probabilities = np.abs(run(qc)) ** 2
+    bound = bind_parameters(qc, {"theta": angle})
+    probabilities = np.abs(run(bound)) ** 2
     return float(probabilities[0] - probabilities[1])   # <Z>
 
 for angle in (0.0, math.pi / 2, math.pi):

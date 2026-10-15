@@ -111,14 +111,12 @@ from fqkit import QuantumCircuit, Hadamard, RX, Parameter, bind_parameters, run,
 
 theta = Parameter("theta")
 
-qc = QuantumCircuit(2)
-qc.add_gate(Hadamard(), [0])
-qc.add_gate(RX(theta), [1])
+template = QuantumCircuit(2)
+template.add_gate(Hadamard(), [0])
+template.add_gate(RX(theta), [1])
 
-bind_parameters(qc, {"theta": 3.14159})
-
-counts = measure_all(run(qc), shots=1024)
-print(counts)
+bound = bind_parameters(template, {"theta": 3.14159})  # template stays unbound
+print(measure_all(run(bound), shots=1024, seed=1))
 ```
 
 ## Export to OpenQASM: run on real hardware
