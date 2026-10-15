@@ -22,24 +22,52 @@ print(state)   # [0.707+0j 0+0j 0+0j 0.707+0j]
 ```
 
 The circuit always starts in `|00...0>` and each operation is applied in order.
+You can also pass an initial statevector: `run(circuit, state=...)`.
 
-## How the simulator works
+## Ideal probabilities
 
-Each gate is applied to the statevector by **tensor contraction**. This is what
-lets multi-qubit gates act on any set of qubits, including non-adjacent or
-reversed ones.
+`probabilities(state)` returns the Born-rule table \(P(b)=|a_b|^2\) with **no**
+sampling. Printing it shows a formatted table (not a raw dict).
 
-## Measuring
+```python
+from fqkit import probabilities
 
-`measure_all(state, shots)` samples the statevector and returns a dictionary of
-bitstring counts. The probability of each outcome is the squared magnitude of
-its amplitude.
+print(probabilities(state))
+```
+
+## Measuring all qubits
+
+`measure_all(state, shots, seed=None)` samples every qubit and returns a
+`MeasurementResult` (dict-like counts, plus ideal vs empirical probabilities).
 
 ```python
 from fqkit import measure_all
 
-counts = measure_all(state, shots=1024)
-print(counts)   # {'00': 512, '11': 512}
+print(measure_all(state, shots=1024, seed=7))
+```
+
+## Partial measurement
+
+Measure only some wires. Marginal probabilities are exact:
+
+```python
+from fqkit import measure, collapse
+
+print(measure(state, qubits=[0], shots=1024, seed=1))
+
+# Single shot + collapsed statevector
+bit, psi = collapse(state, qubits=[0], seed=1)
+```
+
+Bitstrings follow the order of the `qubits` list (leftmost bit = first index).
+
+## Plots
+
+```python
+from fqkit import plot, probabilities, measure_all
+
+plot(probabilities(state), show=True)                 # ideal distribution
+plot(measure_all(state, shots=1024, seed=7), show=True)  # shot counts
 ```
 
 ## Bit-order convention
@@ -50,3 +78,6 @@ print(counts)   # {'00': 512, '11': 512}
   measured `1`. Qiskit uses the opposite (little-endian) convention: see
   [OpenQASM & Hardware](/docs/openqasm).
 </Callout>
+
+For the full scientific checklist, see
+[Simulator correctness](/docs/simulator-correctness).

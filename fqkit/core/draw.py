@@ -182,23 +182,36 @@ def draw(circuit, *, ax=None, filename=None, show=None):
 def plot(data, *, ax=None, filename=None, show=None, title=None):
     """Draw probabilities or shot counts and return the Matplotlib figure.
 
-    A state vector becomes one bar per basis state. A counts dictionary
-    (or ``MeasurementResult``) becomes one bar per bitstring that was seen.
-    Bit 0 is the leftmost bit.
+    Accepts:
+
+    * statevector from ``run`` → ideal Born probabilities
+    * ``ProbabilityTable`` from ``probabilities(...)`` → ideal probabilities
+    * ``MeasurementResult`` from ``measure_all(...)`` → shot counts
+    * plain ``dict`` of counts → shot counts
+
+    Bit 0 is the leftmost bit of each label.
     """
     from collections.abc import Mapping
 
     import numpy as np
 
-    from fqkit.core.measurement import MeasurementResult
+    from fqkit.core.measurement import MeasurementResult, ProbabilityTable
 
     _, plt = _pyplot()
-    is_counts = isinstance(data, MeasurementResult) or (
-        isinstance(data, Mapping)
-        and not isinstance(data, (str, bytes))
-        and not hasattr(data, "dtype")
-    )
-    if is_counts:
+
+    if isinstance(data, ProbabilityTable):
+        labels = sorted(data)
+        heights = [float(data[label]) for label in labels]
+        ylabel = "Probability"
+        default_title = "Ideal probabilities"
+    elif isinstance(data, MeasurementResult):
+        labels = sorted(data)
+        heights = [int(data[label]) for label in labels]
+        ylabel = "Shots"
+        default_title = "Measurement counts"
+    elif isinstance(data, Mapping) and not isinstance(data, (str, bytes)) and not hasattr(
+        data, "dtype"
+    ):
         labels = sorted(data)
         heights = [data[label] for label in labels]
         ylabel = "Shots"
@@ -206,17 +219,18 @@ def plot(data, *, ax=None, filename=None, show=None, title=None):
     else:
         array = np.asarray(data)
         if array.ndim == 1 and array.size > 0:
-            probabilities = np.abs(array.astype(complex)) ** 2
-            n = int(round(math.log2(probabilities.size))) if probabilities.size > 1 else 0
-            if n > 0 and (1 << n) != probabilities.size:
+            probs = np.abs(array.astype(complex)) ** 2
+            n = int(round(math.log2(probs.size))) if probs.size > 1 else 0
+            if n > 0 and (1 << n) != probs.size:
                 raise ValueError("A state vector length must be a power of two.")
-            labels = [format(i, f"0{max(n, 1)}b") for i in range(probabilities.size)]
-            heights = probabilities.real
+            labels = [format(i, f"0{max(n, 1)}b") for i in range(probs.size)]
+            heights = probs.real
             ylabel = "Probability"
-            default_title = "Probabilities"
+            default_title = "Ideal probabilities"
         else:
             raise TypeError(
-                "plot expects a state vector, a counts dict, or a MeasurementResult."
+                "plot expects a statevector, ProbabilityTable, "
+                "MeasurementResult, or counts dict."
             )
 
     own_figure = ax is None

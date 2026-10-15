@@ -17,6 +17,7 @@ from fqkit import (
     draw,
     measure_all,
     plot,
+    probabilities,
     run,
 )
 
@@ -73,7 +74,13 @@ def test_plot_state_and_counts(tmp_path):
     labels = [tick.get_text() for tick in state_fig.axes[0].get_xticklabels()]
     assert labels == ["00", "01", "10", "11"]
 
-    counts = measure_all(state, shots=200)
+    # ProbabilityTable must use a probability axis (not "Shots").
+    probs = probabilities(state)
+    probs_fig = plot(probs, show=False)
+    assert probs_fig.axes[0].get_ylabel() == "Probability"
+    assert np.isclose(sum(bar.get_height() for bar in probs_fig.axes[0].patches), 1.0)
+
+    counts = measure_all(state, shots=200, seed=1)
     counts_fig = plot(counts, filename=str(tmp_path / "counts.png"), show=False)
     assert counts_fig.axes[0].get_ylabel() == "Shots"
     assert (tmp_path / "counts.png").stat().st_size > 1000

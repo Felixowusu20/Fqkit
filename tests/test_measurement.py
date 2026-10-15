@@ -1,4 +1,4 @@
-"""Task 2 — seeded measurement and MeasurementResult.
+"""Measurement: seeds, tables, partial readout, collapse.
 
 Run:
     pytest tests/test_measurement.py -v
@@ -13,6 +13,8 @@ from fqkit import (
     CNOT,
     run,
     measure_all,
+    measure,
+    collapse,
     probabilities,
     MeasurementResult,
 )
@@ -77,7 +79,61 @@ def test_result_is_dict_compatible():
     result = measure_all(bell_state(), shots=100, seed=3)
     assert dict(result) == result.counts
     assert "00" in result or "11" in result
-    assert str(result) == str(result.counts)
+
+
+def test_probabilities_print_as_table():
+    text = str(probabilities(bell_state()))
+    assert "outcome" in text
+    assert "probability" in text
+    assert "00" in text
+    assert "11" in text
+    assert "{" not in text  # not a raw JSON/dict dump
+
+
+def test_measurement_print_as_table():
+    text = str(measure_all(bell_state(), shots=200, seed=3))
+    assert "ideal P" in text
+    assert "counts" in text
+    assert "empirical P" in text
+    assert "TV(" in text
+
+
+# --- partial measurement (extra D) ----------------------------------------
+
+def test_measure_one_qubit_of_bell_is_fair_coin():
+    result = measure(bell_state(), qubits=[0], shots=4000, seed=0)
+    assert result.measured_qubits == (0,)
+    assert set(result.counts) <= {"0", "1"}
+    assert result.ideal_probabilities["0"] == pytest.approx(0.5)
+    assert result.ideal_probabilities["1"] == pytest.approx(0.5)
+    assert 1700 < result["0"] < 2300
+
+
+def test_measure_qubit_order_defines_bitstring():
+    # On |10>, measuring [0, 1] → "10"; measuring [1, 0] → "01".
+    qc = QuantumCircuit(2)
+    from fqkit import X
+
+    qc.add_gate(X(), [0])
+    state = run(qc)
+    r01 = measure(state, [0, 1], shots=200, seed=1)
+    r10 = measure(state, [1, 0], shots=200, seed=1)
+    assert set(r01.counts) == {"10"}
+    assert set(r10.counts) == {"01"}
+
+
+def test_collapse_bell_projects_to_product_state():
+    state = bell_state()
+    bit, psi = collapse(state, qubits=[0], seed=2)
+    assert bit in {"0", "1"}
+    # Post-measurement state is |00> or |11>.
+    probs = np.abs(psi) ** 2
+    if bit == "0":
+        assert probs[0] == pytest.approx(1.0)
+    else:
+        assert probs[3] == pytest.approx(1.0)
+    # Original state unchanged.
+    assert np.allclose(np.abs(state) ** 2, [0.5, 0, 0, 0.5])
 
 
 def test_most_probable_is_a_seen_bitstring():
