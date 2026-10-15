@@ -1,0 +1,107 @@
+---
+title: Simulator correctness
+description: How FQkit proves ideal simulation results against known quantum states.
+---
+
+# Simulator correctness
+
+This page is the scientific checklist for FQkit’s classical engine. Every claim
+below is backed by automated tests in the repository.
+
+## What “correct” means here
+
+For an ideal (noiseless) simulator we require:
+
+1. **Unitary gates** — each built-in matrix satisfies \(U^\dagger U = I\).
+2. **Known states** — Bell and GHZ amplitudes match analytics within \(10^{-10}\).
+3. **Born rule** — outcome probabilities are \(P(b) = |a_b|^2\).
+4. **Reproducible shots** — the same `seed` yields the same counts.
+5. **Circuit identities** — e.g. \(H\cdot H = I\), checked on all basis inputs.
+
+You do **not** need a quantum computer to validate these. The classical engine
+is the reference; hardware is compared against it later.
+
+## Worked example: the Bell state
+
+Prepare
+
+\[
+|\Phi^+\rangle = \frac{|00\rangle + |11\rangle}{\sqrt{2}}.
+\]
+
+```python
+from fqkit import (
+    QuantumCircuit, Hadamard, CNOT, run,
+    probabilities, measure_all, expectation, pauli,
+    circuits_equivalent,
+)
+
+qc = QuantumCircuit(2)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+state = run(qc)
+
+print(probabilities(state))
+# ideal P(00) = P(11) = 1/2
+
+print(measure_all(state, shots=1024, seed=7))
+# finite-shot histogram near 50/50
+
+print(expectation(state, pauli("ZZ")))  # +1
+print(expectation(state, "XX"))         # +1
+print(expectation(state, "YY"))         # -1
+```
+
+That single circuit tests gates, entanglement, normalization, sampling, and
+Pauli expectations together.
+
+## Parameters without mutating the template
+
+`bind_parameters` returns a **new** circuit by default. The template stays
+symbolic for the next variational step:
+
+```python
+from fqkit import Parameter, RX, QuantumCircuit, bind_parameters, run
+
+theta = Parameter("theta")
+template = QuantumCircuit(1)
+template.add_gate(RX(theta), [0])
+
+bound = bind_parameters(template, {"theta": 1.57})
+state = run(bound)
+# template is still unbound
+```
+
+## Partial measurement
+
+Measure a subset of wires with exact marginal probabilities:
+
+```python
+from fqkit import measure, collapse
+
+print(measure(state, qubits=[0], shots=1024, seed=1))
+bit, psi = collapse(state, qubits=[0], seed=1)
+```
+
+## Noise (density matrices)
+
+Ideal `run` stays pure. For open-system models use `run_density` with Kraus
+noise — see the API and `examples/noisy_bell.py` in the repository.
+
+## Where the tests live
+
+| Concern | Test module |
+| --- | --- |
+| Gates / Bell / GHZ | `tests/test_statevector_validation.py` |
+| Shots / seeds / tables | `tests/test_measurement.py` |
+| Paulis / Hamiltonians | `tests/test_observables.py` |
+| Circuit identities | `tests/test_equivalence.py` |
+| Density + Kraus noise | `tests/test_density.py` |
+| Immutable binding | `tests/test_bind_parameters.py` |
+
+Run them locally:
+
+```bash
+pip install -e ".[dev]"
+pytest -v
+```

@@ -227,27 +227,23 @@ Without numbers, collaborators waste time on premature optimization.
 
 ### A. Missing gates: I, X, Y, Z, S, T
 
-Matches textbook algorithms. Mirror `Hadamard` in `gate.py`; add matrix and
-one-qubit state tests.
+**Status:** Done (Task 1).
 
 ### B. `probabilities(state)` helper
 
-Ideal probabilities without shots. Useful for plots, docs, and debugging
-expectations.
+**Status:** Done (`ProbabilityTable` + table display).
 
 ### C. Immutable parameter binding
 
-Today binding may mutate circuits. Prefer returning a bound copy and leaving
-the original unbound.
+**Status:** Done (`bind_parameters` returns a new circuit by default; `inplace=True` escape hatch).
 
 ### D. Single-qubit / partial Z-measurement
 
-Clarifies collapse and `Result` design before noise work.
+**Status:** Done (`measure`, `collapse` in `fqkit/core/measurement.py`).
 
 ### E. Simulator correctness docs page
 
-One Bell example that covers gates, entanglement, norm, and sampling — under
-`website/src/content/` or tutorials.
+**Status:** Done (`website/src/content/simulator-correctness.mdx`).
 
 ---
 

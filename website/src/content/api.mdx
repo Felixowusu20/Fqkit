@@ -10,8 +10,14 @@ Everything below is importable from the top level:
 ```python
 from fqkit import (
     QuantumCircuit, Qubit, Parameter, Gate,
-    Hadamard, RX, RY, RZ, CNOT, CZ, SWAP, Toffoli,
-    bind_parameters, run, apply_gate, measure_all, to_qasm,
+    Identity, Hadamard, X, Y, Z, S, T,
+    RX, RY, RZ, CNOT, CZ, SWAP, Toffoli,
+    bind_parameters, run, apply_gate,
+    probabilities, measure_all, measure, collapse,
+    pauli, expectation, Hamiltonian,
+    fidelity, states_equivalent, circuits_equivalent,
+    run_density, to_density, Noise, purity, entropy, is_physical,
+    to_qasm, draw, plot,
 )
 ```
 
@@ -26,6 +32,7 @@ QuantumCircuit(num_qubits: int)
 - `.operations`: ordered list of `Operation`s
 - `.add_gate(gate, target_qubits)`: append a gate; validates targets
 - `.to_qasm(measure=True)`: export to an OpenQASM 2.0 string
+- `.draw(...)`: Matplotlib circuit diagram
 
 ## Gates
 
@@ -33,42 +40,67 @@ Factories return a `Gate`:
 
 | Function | Returns |
 | --- | --- |
-| `Hadamard()` | 1-qubit H gate |
+| `Identity()` / `Hadamard()` / `X()` / `Y()` / `Z()` / `S()` / `T()` | 1-qubit |
 | `RX(theta)` / `RY(theta)` / `RZ(theta)` | 1-qubit rotation |
 | `CNOT()` / `CZ()` / `SWAP()` | 2-qubit gate |
 | `Toffoli()` | 3-qubit gate |
 
-```python
-Gate(name: str, num_qubits: int, matrix=None, params=None)
-```
-
 ## Simulation
 
 ```python
-run(circuit) -> np.ndarray
+run(circuit, state=None) -> np.ndarray
 ```
 
-Returns the final statevector (length `2**num_qubits`, complex).
+Final statevector. Optional `state` sets the initial amplitudes.
 
 ```python
 apply_gate(state, gate_matrix, num_qubits, target_qubits) -> np.ndarray
 ```
 
-Low-level helper: applies one gate to a statevector by tensor contraction.
-
 ## Measurement
 
 ```python
-measure_all(state_vector, shots=1024) -> dict
+probabilities(state_or_rho) -> ProbabilityTable
+measure_all(state_or_rho, shots=1024, seed=None) -> MeasurementResult
+measure(state_or_rho, qubits, shots=1024, seed=None) -> MeasurementResult
+collapse(state, qubits, seed=None) -> (bitstring, new_state)
 ```
 
-Samples the statevector and returns a mapping of bitstring to count.
+`print` on probability / measurement results shows formatted tables.
+`plot(...)` draws bar charts for statevectors, `ProbabilityTable`, or counts.
 
 ## Parameters
 
 ```python
 Parameter(name: str)
-bind_parameters(circuit, param_values: dict)
+bind_parameters(circuit, param_values: dict, *, inplace=False) -> QuantumCircuit
+```
+
+Default binding returns a **new** circuit and leaves the template unchanged.
+
+## Observables
+
+```python
+pauli("ZZ")
+expectation(state_or_rho, observable) -> float
+Hamiltonian(("ZZ", 0.5), ("XX", 0.25))
+```
+
+## Equivalence
+
+```python
+fidelity(a, b) -> float
+states_equivalent(a, b, phase=True) -> bool
+circuits_equivalent(a, b, phase=True) -> bool
+```
+
+## Density matrix & noise
+
+```python
+run_density(circuit, state=None, noise=None, noise_every_gate=False)
+to_density(state)
+Noise.depolarizing(p) / Noise.bit_flip(p) / Noise.phase_flip(p) / Noise.amplitude_damping(gamma)
+purity(rho) / entropy(rho) / is_physical(rho)
 ```
 
 ## OpenQASM
@@ -76,9 +108,6 @@ bind_parameters(circuit, param_values: dict)
 ```python
 to_qasm(circuit, measure=True) -> str
 ```
-
-Serializes a circuit to OpenQASM 2.0. Raises `ValueError` for unbound
-parameters or gates with no QASM equivalent.
 
 ## Hardware jobs
 
@@ -88,17 +117,5 @@ Imported from `fqkit.hardware`, not from the top-level `fqkit` package:
 from fqkit.hardware import providers, backends, submit, get_job
 ```
 
-- `providers()`: the machines you can name, and whether that SDK is installed
-- `backends(machine, live=False)`: the default device, or the live list when `live=True`
-- `submit(circuit, machine, shots=1024, backend=None)`: send a job, return a `HardwareJob`
-- `get_job(machine, job_id)`: reconnect to a job that is already running
-- `job.status()`: `QUEUED`, `RUNNING`, `COMPLETED`, `CANCELLED`, or `FAILED`
-- `job.counts()`: wait, then return bitstrings in FQkit order
-- `job.cancel()`: ask the vendor to cancel
-
 The walkthrough is [Hardware](/docs/hardware).
-
-## Other classses
-
-- `Qubit(index)`: a stateless reference to a qubit by index
-- `Operation(gate, target_qubits)`: a gate bound to specific qubits
+Correctness checklist: [Simulator correctness](/docs/simulator-correctness).
