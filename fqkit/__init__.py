@@ -10,14 +10,20 @@ Quick start
     qc.add_gate(CNOT(), [0, 1])
 
     state = run(qc)
-    counts = measure_all(state, shots=1024)
+    result = measure_all(state, shots=1024, seed=7)
 """
 
 from fqkit.core import (
     Qubit,
     Parameter,
     Gate,
+    Identity,
     Hadamard,
+    X,
+    Y,
+    Z,
+    S,
+    T,
     RX,
     RY,
     RZ,
@@ -30,7 +36,9 @@ from fqkit.core import (
     bind_parameters,
     run,
     apply_gate,
+    MeasurementResult,
     measure_all,
+    probabilities,
     to_qasm,
     draw,
     plot,
@@ -42,7 +50,13 @@ __all__ = [
     "Qubit",
     "Parameter",
     "Gate",
+    "Identity",
     "Hadamard",
+    "X",
+    "Y",
+    "Z",
+    "S",
+    "T",
     "RX",
     "RY",
     "RZ",
@@ -55,7 +69,9 @@ __all__ = [
     "bind_parameters",
     "run",
     "apply_gate",
+    "MeasurementResult",
     "measure_all",
+    "probabilities",
     "to_qasm",
     "draw",
     "plot",

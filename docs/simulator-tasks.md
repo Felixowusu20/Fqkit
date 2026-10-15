@@ -18,7 +18,7 @@ Every PR should meet four standards:
 
 ## Task 1 — Finish statevector validation
 
-**Status:** Partial · **Labels:** `foundation`, `simulator`, `good first issue` (parts)
+**Status:** Done (see `tests/test_statevector_validation.py`) · **Labels:** `foundation`, `simulator`
 
 ### Why it helps
 
@@ -61,7 +61,7 @@ collaborators can trust for small-system research.
 
 ## Task 2 — Measurement v2 (seeds, Result, clearer API)
 
-**Status:** Partial · **Labels:** `foundation`, `simulator`
+**Status:** Done (see `fqkit/core/measurement.py`, `tests/test_measurement.py`) · **Labels:** `foundation`, `simulator`
 
 ### Why it helps
 

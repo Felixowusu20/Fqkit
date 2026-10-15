@@ -2,6 +2,44 @@ import numpy as np
 
 from fqkit.core.parameter import Parameter
 
+# How close U†U must be to I before we reject a gate matrix.
+_UNITARY_ATOL = 1e-8
+
+
+def _validate_apply_gate_inputs(state, gate_matrix, num_qubits, target_qubits):
+    """
+    Check the contracts that make apply_gate mathematically safe.
+
+    - state length must be 2**num_qubits
+    - gate matrix must be (2**k, 2**k) for k = len(target_qubits)
+    - gate matrix must be unitary (U†U ≈ I)
+    """
+    state = np.asarray(state)
+    expected_len = 2 ** num_qubits
+    if state.ndim != 1 or state.shape[0] != expected_len:
+        raise ValueError(
+            f"State vector length must be {expected_len} for {num_qubits} qubits, "
+            f"got shape {state.shape}."
+        )
+
+    k = len(target_qubits)
+    U = np.asarray(gate_matrix, dtype=complex)
+    expected_shape = (2 ** k, 2 ** k)
+    if U.shape != expected_shape:
+        raise ValueError(
+            f"Gate matrix for {k} target qubit(s) must have shape {expected_shape}, "
+            f"got {U.shape}."
+        )
+
+    product = U.conj().T @ U
+    if not np.allclose(product, np.eye(2 ** k), atol=_UNITARY_ATOL):
+        raise ValueError(
+            "Gate matrix is not unitary within tolerance "
+            f"{_UNITARY_ATOL} (U†U must equal I)."
+        )
+
+    return state, U
+
 
 def apply_gate(state, gate_matrix, num_qubits, target_qubits):
     """
@@ -23,13 +61,16 @@ def apply_gate(state, gate_matrix, num_qubits, target_qubits):
     target_qubits : list of k qubit indices the gate acts on
     """
     k = len(target_qubits)
+    state, U = _validate_apply_gate_inputs(
+        state, gate_matrix, num_qubits, target_qubits
+    )
 
     # View the state as a rank-n tensor: axis i corresponds to qubit i.
     state_tensor = state.reshape([2] * num_qubits)
 
     # View the gate as a rank-2k tensor: the first k axes are the output
     # (row) indices and the last k axes are the input (column) indices.
-    gate_tensor = np.asarray(gate_matrix, dtype=complex).reshape([2] * (2 * k))
+    gate_tensor = U.reshape([2] * (2 * k))
 
     # Contract the gate's input axes with the state's target-qubit axes.
     state_tensor = np.tensordot(

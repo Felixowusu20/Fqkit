@@ -21,7 +21,13 @@ from fqkit.core.parameter import Parameter
 # fqkit gate name -> (OpenQASM gate name, is_parameterized)
 # All of these are provided by the standard "qelib1.inc" library.
 _QASM_GATES = {
+    "I":       ("id",   False),
     "H":       ("h",    False),
+    "X":       ("x",    False),
+    "Y":       ("y",    False),
+    "Z":       ("z",    False),
+    "S":       ("s",    False),
+    "T":       ("t",    False),
     "CNOT":    ("cx",   False),
     "CZ":      ("cz",   False),
     "SWAP":    ("swap", False),

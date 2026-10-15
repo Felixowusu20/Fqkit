@@ -149,7 +149,7 @@ def test_measure_all_bell_distribution():
     qc = QuantumCircuit(2)
     qc.add_gate(Hadamard(), [0])
     qc.add_gate(CNOT(), [0, 1])
-    counts = measure_all(run(qc), shots=4000)
+    counts = measure_all(run(qc), shots=4000, seed=0)
     assert set(counts) == {"00", "11"}
     assert sum(counts.values()) == 4000
     assert 1700 < counts["00"] < 2300   # roughly 50/50

@@ -8,7 +8,13 @@ from fqkit.core.parameter import Parameter
 
 
 _GATES = {
+    "I": ("id", False),
     "H": ("h", False),
+    "X": ("x", False),
+    "Y": ("y", False),
+    "Z": ("z", False),
+    "S": ("s", False),
+    "T": ("t", False),
     "CNOT": ("cnot", False),
     "CZ": ("cz", False),
     "SWAP": ("swap", False),

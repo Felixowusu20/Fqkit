@@ -10,7 +10,7 @@ import math
 
 from fqkit.core.parameter import Parameter
 
-_BOX = {"H", "RX", "RY", "RZ"}
+_BOX = {"I", "H", "X", "Y", "Z", "S", "T", "RX", "RY", "RZ"}
 _LINKED = {"CNOT", "CZ", "SWAP", "Toffoli"}
 
 _INK = "#202124"
@@ -183,28 +183,41 @@ def plot(data, *, ax=None, filename=None, show=None, title=None):
     """Draw probabilities or shot counts and return the Matplotlib figure.
 
     A state vector becomes one bar per basis state. A counts dictionary
-    becomes one bar per bitstring that was seen. Bit 0 is the leftmost bit.
+    (or ``MeasurementResult``) becomes one bar per bitstring that was seen.
+    Bit 0 is the leftmost bit.
     """
+    from collections.abc import Mapping
+
     import numpy as np
 
+    from fqkit.core.measurement import MeasurementResult
+
     _, plt = _pyplot()
-    array = np.asarray(data) if not isinstance(data, dict) else None
-    if isinstance(data, dict):
+    is_counts = isinstance(data, MeasurementResult) or (
+        isinstance(data, Mapping)
+        and not isinstance(data, (str, bytes))
+        and not hasattr(data, "dtype")
+    )
+    if is_counts:
         labels = sorted(data)
         heights = [data[label] for label in labels]
         ylabel = "Shots"
         default_title = "Counts"
-    elif array is not None and array.ndim == 1 and array.size > 0:
-        probabilities = np.abs(array.astype(complex)) ** 2
-        n = int(round(math.log2(probabilities.size))) if probabilities.size > 1 else 0
-        if n > 0 and (1 << n) != probabilities.size:
-            raise ValueError("A state vector length must be a power of two.")
-        labels = [format(i, f"0{max(n, 1)}b") for i in range(probabilities.size)]
-        heights = probabilities.real
-        ylabel = "Probability"
-        default_title = "Probabilities"
     else:
-        raise TypeError("plot expects a state vector or a counts dictionary.")
+        array = np.asarray(data)
+        if array.ndim == 1 and array.size > 0:
+            probabilities = np.abs(array.astype(complex)) ** 2
+            n = int(round(math.log2(probabilities.size))) if probabilities.size > 1 else 0
+            if n > 0 and (1 << n) != probabilities.size:
+                raise ValueError("A state vector length must be a power of two.")
+            labels = [format(i, f"0{max(n, 1)}b") for i in range(probabilities.size)]
+            heights = probabilities.real
+            ylabel = "Probability"
+            default_title = "Probabilities"
+        else:
+            raise TypeError(
+                "plot expects a state vector, a counts dict, or a MeasurementResult."
+            )
 
     own_figure = ax is None
     if own_figure:
