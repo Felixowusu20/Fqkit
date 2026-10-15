@@ -6,13 +6,18 @@ from fqkit.core.parameter import Parameter
 _UNITARY_ATOL = 1e-8
 
 
-def _validate_apply_gate_inputs(state, gate_matrix, num_qubits, target_qubits):
+def _validate_apply_gate_inputs(
+    state, gate_matrix, num_qubits, target_qubits, *, check_unitary=True
+):
     """
     Check the contracts that make apply_gate mathematically safe.
 
     - state length must be 2**num_qubits
     - gate matrix must be (2**k, 2**k) for k = len(target_qubits)
-    - gate matrix must be unitary (U†U ≈ I)
+    - gate matrix must be unitary (U†U ≈ I) when ``check_unitary`` is True
+
+    Kraus operators used in noise channels are not unitary; density-matrix
+    code calls ``apply_gate(..., check_unitary=False)``.
     """
     state = np.asarray(state)
     expected_len = 2 ** num_qubits
@@ -31,17 +36,18 @@ def _validate_apply_gate_inputs(state, gate_matrix, num_qubits, target_qubits):
             f"got {U.shape}."
         )
 
-    product = U.conj().T @ U
-    if not np.allclose(product, np.eye(2 ** k), atol=_UNITARY_ATOL):
-        raise ValueError(
-            "Gate matrix is not unitary within tolerance "
-            f"{_UNITARY_ATOL} (U†U must equal I)."
-        )
+    if check_unitary:
+        product = U.conj().T @ U
+        if not np.allclose(product, np.eye(2 ** k), atol=_UNITARY_ATOL):
+            raise ValueError(
+                "Gate matrix is not unitary within tolerance "
+                f"{_UNITARY_ATOL} (U†U must equal I)."
+            )
 
     return state, U
 
 
-def apply_gate(state, gate_matrix, num_qubits, target_qubits):
+def apply_gate(state, gate_matrix, num_qubits, target_qubits, *, check_unitary=True):
     """
     Apply a k-qubit gate to the target qubits of an n-qubit state vector.
 
@@ -56,13 +62,19 @@ def apply_gate(state, gate_matrix, num_qubits, target_qubits):
     Parameters
     ----------
     state         : (2**num_qubits,) complex state vector
-    gate_matrix   : (2**k, 2**k) unitary acting on k = len(target_qubits) qubits
+    gate_matrix   : (2**k, 2**k) matrix acting on k = len(target_qubits) qubits
     num_qubits    : total number of qubits in the circuit
     target_qubits : list of k qubit indices the gate acts on
+    check_unitary : bool
+        If True (default), require a unitary matrix. Set False for Kraus ops.
     """
     k = len(target_qubits)
     state, U = _validate_apply_gate_inputs(
-        state, gate_matrix, num_qubits, target_qubits
+        state,
+        gate_matrix,
+        num_qubits,
+        target_qubits,
+        check_unitary=check_unitary,
     )
 
     # View the state as a rank-n tensor: axis i corresponds to qubit i.
@@ -129,19 +141,33 @@ def _gate_matrix(gate):
     return np.array(gate.matrix, dtype=complex)
 
 
-def run(circuit):
+def run(circuit, state=None):
     """
     Run a QuantumCircuit and return the final state vector.
 
-    The circuit starts in |00...0> and each operation is applied in order.
+    Parameters
+    ----------
+    circuit : QuantumCircuit
+        Gates are applied in order.
+    state : array-like, optional
+        Initial statevector of length ``2**n``. If omitted, starts in
+        ``|00...0>``. The input array is not modified.
     """
     num_qubits = circuit.num_qubits
+    dim = 2 ** num_qubits
 
-    # Initialize the |0...0> state.
-    state = np.zeros(2 ** num_qubits, dtype=complex)
-    state[0] = 1.0
+    if state is None:
+        psi = np.zeros(dim, dtype=complex)
+        psi[0] = 1.0
+    else:
+        psi = np.asarray(state, dtype=complex).reshape(-1).copy()
+        if psi.shape[0] != dim:
+            raise ValueError(
+                f"Initial state length must be {dim} for {num_qubits} qubits, "
+                f"got {psi.shape[0]}."
+            )
 
     for op in circuit.operations:
-        state = apply_gate(state, _gate_matrix(op.gate), num_qubits, op.qubits)
+        psi = apply_gate(psi, _gate_matrix(op.gate), num_qubits, op.qubits)
 
-    return state
+    return psi

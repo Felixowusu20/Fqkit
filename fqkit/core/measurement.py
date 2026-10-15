@@ -97,16 +97,52 @@ def _born_probabilities(state: np.ndarray, *, atol: float = _NORM_ATOL):
     return probabilities, state_norm, renormalized
 
 
-def probabilities(state_vector) -> dict[str, float]:
-    """
-    Ideal Born probabilities P(b) = |a_b|² with **no** sampling.
+def _density_probabilities(rho: np.ndarray, *, atol: float = _NORM_ATOL):
+    """Born readout from a density matrix: P(b) = ρ_{bb}."""
+    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:
+        raise ValueError(f"Density matrix must be square, got shape {rho.shape}.")
+    dim = rho.shape[0]
+    if dim == 0 or (dim & (dim - 1)) != 0:
+        raise ValueError(
+            f"Density matrix dimension must be a power of two, got {dim}."
+        )
 
-    Returns a dict ``{bitstring: probability}`` for every basis state
-    (including zeros). Prefer this when you need exact theory curves;
-    use ``measure_all`` when you need a finite-shot histogram.
+    probs = np.real(np.diag(rho)).astype(np.float64, copy=False)
+    total = float(probs.sum())
+    if total <= 0.0:
+        raise ValueError("Density matrix has non-positive diagonal; cannot sample.")
+
+    deviation = abs(total - 1.0)
+    if deviation > max(atol * 1e4, 1e-4):
+        raise ValueError(
+            f"Density matrix diagonal does not sum to 1 (sum={total:.6e})."
+        )
+
+    probabilities = probs / total
+    renormalized = deviation > atol
+    # For density inputs, state_norm stores Tr(ρ) (physical scale check).
+    state_norm = float(np.real(np.trace(rho)))
+    return probabilities, state_norm, renormalized
+
+
+def _outcome_probabilities(state_or_rho, *, atol: float = _NORM_ATOL):
+    """Accept a statevector or a density matrix."""
+    arr = np.asarray(state_or_rho, dtype=complex)
+    if arr.ndim == 2:
+        return _density_probabilities(arr, atol=atol)
+    return _born_probabilities(_as_statevector(arr), atol=atol)
+
+
+def probabilities(state_or_rho) -> dict[str, float]:
     """
-    state = _as_statevector(state_vector)
-    probs, _, _ = _born_probabilities(state)
+    Ideal outcome probabilities with **no** sampling.
+
+    * Statevector ``|ψ⟩`` → ``P(b) = |a_b|²``
+    * Density matrix ``ρ`` → ``P(b) = ρ_{bb}``
+
+    Returns a dict ``{bitstring: probability}`` for every basis state.
+    """
+    probs, _, _ = _outcome_probabilities(state_or_rho)
     n = int(np.log2(len(probs)))
     return {format(i, f"0{n}b"): float(probs[i]) for i in range(len(probs))}
 
@@ -208,21 +244,21 @@ class MeasurementResult(Mapping):
         )
 
 
-def measure_all(state_vector, shots=1024, seed=None, *, atol=_NORM_ATOL):
+def measure_all(state_or_rho, shots=1024, seed=None, *, atol=_NORM_ATOL):
     """
     Sample computational-basis measurements of every qubit.
 
     Parameters
     ----------
-    state_vector : array-like
-        Length-2**n complex state from ``run(circuit)``.
+    state_or_rho : array-like
+        Statevector from ``run`` or density matrix from ``run_density``.
     shots : int
         Number of independent measurement repetitions (≥ 1).
     seed : int or None
         If set, sampling is reproducible via ``numpy.random.default_rng(seed)``.
         If None, draws are non-deterministic (normal for interactive use).
     atol : float
-        Tolerance for ‖ψ‖² ≈ 1 before renormalizing / rejecting.
+        Tolerance for probability normalization before sampling.
 
     Returns
     -------
@@ -237,11 +273,9 @@ def measure_all(state_vector, shots=1024, seed=None, *, atol=_NORM_ATOL):
     if not isinstance(shots, (int, np.integer)) or shots < 1:
         raise ValueError(f"shots must be a positive integer, got {shots!r}.")
 
-    state = _as_statevector(state_vector)
-    dim = state.shape[0]
+    probs, state_norm, renormalized = _outcome_probabilities(state_or_rho, atol=atol)
+    dim = probs.shape[0]
     num_qubits = int(np.log2(dim))
-
-    probs, state_norm, renormalized = _born_probabilities(state, atol=atol)
 
     # Isolated Generator: never touches the global np.random state.
     rng = np.random.default_rng(seed)

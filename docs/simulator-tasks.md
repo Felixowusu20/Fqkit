@@ -105,7 +105,7 @@ metadata), not a bare `dict`.
 
 ## Task 3 — Pauli observables and expectation values
 
-**Status:** Missing · **Labels:** `research`, `simulator`
+**Status:** Done (see `fqkit/core/observables.py`, `tests/test_observables.py`, `examples/bell_expectations.py`) · **Labels:** `research`, `simulator`
 
 ### Why it helps
 
@@ -138,7 +138,7 @@ only looking at shot histograms.
 
 ## Task 4 — Local circuit equivalence tests
 
-**Status:** Missing · **Labels:** `quality`, `tests`
+**Status:** Done (see `fqkit/core/equivalence.py`, `tests/test_equivalence.py`, `examples/equivalence_identities.py`) · **Labels:** `quality`, `tests`
 
 ### Why it helps
 
@@ -166,7 +166,7 @@ not a substitute for in-library identities.
 
 ## Task 5 — Density-matrix simulator and simple noise
 
-**Status:** Missing · **Labels:** `advanced`, `simulator` · **Depends on:** Tasks 1–3 solid
+**Status:** Done (see `fqkit/core/density.py`, `tests/test_density.py`, `examples/noisy_bell.py`) · **Labels:** `advanced`, `simulator`
 
 ### Why it helps
 
@@ -198,7 +198,7 @@ models all quantum noise.
 
 ## Task 6 — Performance and memory benchmarks
 
-**Status:** Missing · **Labels:** `performance`
+**Status:** Done (see `benchmarks/bench_fqkit.py`, `benchmarks/README.md`) · **Labels:** `performance`
 
 ### Why it helps
 

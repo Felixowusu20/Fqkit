@@ -24,6 +24,17 @@ from fqkit.core.circuit import QuantumCircuit
 from fqkit.core.parameter_binding import bind_parameters
 from fqkit.core.simulator import run, apply_gate
 from fqkit.core.measurement import MeasurementResult, measure_all, probabilities
+from fqkit.core.observables import Pauli, Hamiltonian, pauli, expectation
+from fqkit.core.equivalence import fidelity, states_equivalent, circuits_equivalent
+from fqkit.core.density import (
+    Noise,
+    to_density,
+    run_density,
+    trace,
+    purity,
+    entropy,
+    is_physical,
+)
 from fqkit.core.qasm import to_qasm
 from fqkit.core.draw import draw, plot
 
@@ -53,6 +64,20 @@ __all__ = [
     "MeasurementResult",
     "measure_all",
     "probabilities",
+    "Pauli",
+    "Hamiltonian",
+    "pauli",
+    "expectation",
+    "fidelity",
+    "states_equivalent",
+    "circuits_equivalent",
+    "Noise",
+    "to_density",
+    "run_density",
+    "trace",
+    "purity",
+    "entropy",
+    "is_physical",
     "to_qasm",
     "draw",
     "plot",

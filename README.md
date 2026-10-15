@@ -227,6 +227,16 @@ FQkit uses **big-endian** qubit ordering: qubit 0 is the most significant bit
 of the state-vector index, and the first qubit passed to a multi-qubit gate is
 its most significant qubit (for `CNOT`, the control).
 
+## Benchmarks
+
+See how far the engines go on your laptop (specs table + timing/memory tables):
+
+```bash
+PYTHONPATH=. python benchmarks/bench_fqkit.py
+```
+
+Details: [benchmarks/README.md](benchmarks/README.md).
+
 ## Contributing
 
 We are prioritizing classical-simulator correctness and research usefulness.

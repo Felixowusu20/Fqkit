@@ -23,6 +23,9 @@ ENV/
 htmlcov/
 .tox/
 
+# Machine-specific benchmark output (regenerate with --save)
+benchmarks/RESULTS.md
+
 # Editors / OS
 .idea/
 .vscode/
