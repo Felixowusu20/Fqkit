@@ -1,0 +1,62 @@
+---
+title: Runtime
+description: What IBM Qiskit Runtime and Amazon Braket do after FQkit submits a circuit.
+---
+
+# Runtime
+
+The runtime is the vendor's service that accepts a circuit, fits it to a real chip, and runs the shots. FQkit keeps one interface in front of two runtimes: Qiskit Runtime for IBM, and Amazon Braket for IonQ, Rigetti, IQM, and AQT.
+
+`run()` is not part of this. It never logs in, never queues, and never leaves your computer. Use it to check a circuit before you spend a queue slot or a billed task.
+
+## What happens on IBM
+
+`submit(qc, "ibm")` does five things:
+
+1. Export the circuit as OpenQASM 2.0, including a measurement of every qubit.
+2. Load that text into Qiskit.
+3. Ask IBM for a real device. With no `backend`, that is the least busy device that is operational and is not a simulator.
+4. Transpile the circuit for that device. The transpiler rewrites gates into the chip's own gate set and inserts swaps where two qubits are not neighbors.
+5. Send the rewritten circuit to the Qiskit Runtime Sampler. The Sampler returns a job id. The job waits in the queue, then the chip measures it `shots` times.
+
+`job.status()` calls the Runtime again and returns one word. It does not wait.
+
+## What happens on Braket
+
+`submit(qc, "ionq")`, `"rigetti"`, `"iqm"`, or `"aqt"` does the matching work through Amazon Braket:
+
+1. Write the circuit as OpenQASM 3.0. Braket does not take FQkit's OpenQASM 2.0 string.
+2. Open the device named by that machine. The built-in targets are IonQ Forte-1, Rigetti Ankaa-3, IQM Garnet, and AQT IBEX-Q1.
+3. Call `device.run`. Braket compiles the program for that device and returns a task. The task ARN is `job.job_id`.
+4. `job.status()` reads the task state. `job.counts()` waits until the task completes, then reads `measurement_counts`.
+
+## Status words
+
+Every vendor's private status is mapped onto the same five words:
+
+| Word | Meaning |
+| --- | --- |
+| `QUEUED` | Accepted, and waiting. IBM's initializing state is included here. |
+| `RUNNING` | The device is executing the shots. |
+| `COMPLETED` | Results are ready. IBM calls this done. |
+| `CANCELLED` | The job was cancelled before it finished. |
+| `FAILED` | The vendor reported an error. |
+
+An unknown vendor word is returned unchanged, in uppercase, so a new status is still visible.
+
+## Checks before a job is sent
+
+FQkit stops early when the circuit or the call cannot be sent:
+
+- An unbound `Parameter` raises `ValueError`. Bind it first.
+- `shots` below 1 raises `ValueError`.
+- An unknown machine name raises `UnknownMachine`. The message lists `ibm`, `ionq`, `rigetti`, `iqm`, and `aqt`.
+- A missing SDK raises `ProviderNotInstalled` with the `pip install` line.
+
+The vendor can still reject the job after that. A circuit wider than the chip, or a compiled circuit past a device's gate limit, fails in the runtime. Read `job.status()` if it becomes `FAILED`.
+
+## What is not a runtime target
+
+Quantinuum uses its own account system and is not one of these extras. QuEra Aquila is an analog device, so an FQkit gate circuit is not sent there. `backends("braket", live=True)` also skips it when listing online QPUs.
+
+Next: [Job submission](/docs/hardware/jobs).

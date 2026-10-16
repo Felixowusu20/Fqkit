@@ -1,0 +1,28 @@
+title: Superposition
+description: Run a Hadamard in Python and read the probabilities.
+order: 1
+cells:
+  - kind: markdown
+    source: |
+      Qubit 0 starts as 0. Run the Python cell. `show(qc)` draws the circuit under the printed state.
+
+      Then change the code and run the cell again.
+
+      - Delete the Hadamard. Which outcome becomes certain?
+      - Add a second Hadamard. Where does the probability go?
+  - kind: code
+    source: |
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, run, measure_all
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      qc = QuantumCircuit(1)
+      qc.add_gate(Hadamard(), [0])
+
+      state = run(qc)
+      show(qc)
+      plot(state)
+      print("Amplitudes   :", np.round(state, 4))
+      print("Probabilities:", np.round(np.abs(state) ** 2, 4))
+      print("Counts       :", measure_all(state, shots=1024))

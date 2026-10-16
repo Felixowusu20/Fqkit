@@ -1,0 +1,49 @@
+name: Feature request
+description: Propose a feature outside the current simulator roadmap.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If this fits the classical simulator roadmap, use the **Simulator task**
+        template instead so it stays aligned with
+        [docs/simulator-tasks.md](https://github.com/Felixowusu20/Fqkit/blob/main/docs/simulator-tasks.md).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to do that FQkit does not support well?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: API sketch or behavior you would like.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Classical simulator
+        - Gates / circuits
+        - Measurement / results
+        - Observables / VQE-related
+        - Documentation / tutorials
+        - Hardware
+        - Website / admin
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional.

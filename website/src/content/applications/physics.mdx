@@ -1,0 +1,63 @@
+---
+title: '3. Physics'
+description: Read a phase with a Ramsey circuit, the same pattern as a spin, an atomic clock, and a small interferometer.
+---
+
+# 3. Physics
+
+A lot of laboratory physics is a phase measurement. A spin sits in a magnetic field and precesses. An atomic clock lets that precession run for a known time. A neutron or atom interferometer splits a path, lets one arm pick up a phase, and recombines the paths. The circuit is the same shape every time.
+
+## The question
+
+A phase <Math tex="\theta" /> was written onto a qubit. What is <Math tex="\theta" />?
+
+You cannot read a phase by measuring the qubit in the state the phase was applied to. The [interference](/docs/tutorials/interference) lesson is why: a second Hadamard turns the hidden phase into a probability.
+
+## The quantum idea
+
+Start from <Math tex="|0\rangle" />. The first Hadamard splits the qubit into two amplitudes. <Math tex="\mathrm{RZ}(\theta)" /> multiplies one of them by a phase and leaves the other alone, which is the precession, or the extra path length, or the extra time in the clock. The second Hadamard recombines the amplitudes. The probability of outcome 1 is
+
+<Equation tex="P(1) = \sin^2(\theta / 2)" />
+
+So <Math tex="\theta = 0" /> returns 0 for certain, <Math tex="\theta = \pi / 2" /> is an even coin, and <Math tex="\theta = \pi" /> returns 1 for certain.
+
+## A toy you can run
+
+<Circuit spec="H 0; RZ pi 0; H 0" caption="A Ramsey sequence with a half-turn of phase. Outcome 1 is certain." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, RZ, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def ramsey(theta):
+    qc = QuantumCircuit(1)
+    qc.add_gate(Hadamard(), [0])
+    qc.add_gate(RZ(theta), [0])
+    qc.add_gate(Hadamard(), [0])
+    probabilities = np.abs(run(qc)) ** 2
+    print(f"theta = {theta:.4f}   P = {np.round(probabilities, 4)}")
+
+for theta in (0.0, math.pi / 2, math.pi):
+    ramsey(theta)
+```
+
+```text
+theta = 0.0000   P = [1. 0.]
+theta = 1.5708   P = [0.5 0.5]
+theta = 3.1416   P = [0. 1.]
+```
+
+The right-hand number is <Math tex="P(1)" />. It matches <Math tex="\sin^2(\theta/2)" />.
+
+## Follow up
+
+1. In the [physics notebook](/notebooks/physics), set the angle to <Math tex="3\pi/2" /> before you run it. Predict <Math tex="P(1)" /> from the formula, then check the printout.
+2. The [interference](/docs/tutorials/interference) lesson is this circuit with the angle fixed at <Math tex="\pi" />, plus the explanation of why the second Hadamard is required.
+3. Two detectors and a phase shifter in an optics lab are this circuit with a different story attached. The arithmetic does not change.
+
+## The real scale
+
+Atomic clocks, atom interferometers, and spin-resonance spectrometers are this sequence with a better phase reference and a longer wait between the two Hadamards. Quantum sensing, on the [further sectors](/docs/applications/further) page, is the same circuit pointed at a magnetic field or a gravitational gradient. Noise, drift, and how many repetitions you can afford are what the laboratory spends its time on. The simulator here is noiseless, so the formula is exact.

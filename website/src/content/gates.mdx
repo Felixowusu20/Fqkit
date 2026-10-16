@@ -26,10 +26,31 @@ A gate is a unitary operation applied to one or more qubits. FQkit provides a
 | SWAP | `SWAP()` | 2 | Swaps two qubits |
 | Toffoli | `Toffoli()` | 3 | Controlled-controlled-NOT |
 
+## What each gate looks like
+
+Qubit 0 is the top wire. These are the same symbols used in the tutorials
+and in the [notebooks](/notebooks).
+
+<Circuit spec="H 0" caption="Hadamard" />
+
+<Circuit spec="RX pi/2 0" caption="RX, a rotation about X" />
+
+<Circuit spec="RY pi/2 0" caption="RY, a rotation about Y" />
+
+<Circuit spec="RZ pi 0" caption="RZ, a rotation about Z" />
+
+<Circuit spec="CNOT 0 1" caption="CNOT. The dot is the control, the plus is the target." />
+
+<Circuit spec="CZ 0 1" caption="CZ. Both qubits get a dot." />
+
+<Circuit spec="SWAP 0 1" caption="SWAP" />
+
+<Circuit spec="Toffoli 0 1 2" caption="Toffoli. Two controls, then a target." />
+
 ## Using a gate
 
 Gates are added to a circuit with `add_gate(gate, targets)`. The first target
-qubit is the gate's most significant qubit — for `CNOT`, the control.
+qubit is the gate's most significant qubit. For `CNOT`, that is the control.
 
 ```python
 from fqkit import QuantumCircuit, Hadamard, CNOT, SWAP
@@ -51,7 +72,7 @@ from fqkit import RX, Parameter
 qc.add_gate(RX(1.5708), [0])          # numeric angle
 
 theta = Parameter("theta")
-qc.add_gate(RX(theta), [0])           # symbolic — bind before running
+qc.add_gate(RX(theta), [0])           # symbolic: bind before running
 ```
 
 ## Custom gates

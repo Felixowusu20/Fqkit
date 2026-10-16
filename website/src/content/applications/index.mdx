@@ -1,0 +1,32 @@
+---
+title: Applications
+description: Where a quantum circuit is used, from a two-qubit toy in chemistry, telecommunications, physics, and cryptography to the larger sectors those toys stand in for.
+---
+
+# Applications
+
+A circuit is useful when it answers a question somebody already has. This section takes four of those questions, shows the smallest fqkit program that carries the idea, and then points at the lesson that goes further.
+
+Read them in order if you are new. Each page stands on its own if you already know the circuit it uses.
+
+## How every sector page is organized
+
+1. **The question**: what a person in that field is trying to find out.
+2. **The quantum idea**: the one feature of a circuit that helps.
+3. **A toy you can run**: few qubits, gates fqkit already has, and the output the simulator prints.
+4. **Follow up**: a change to make yourself, then the lesson or notebook that continues the same idea.
+5. **The real scale**: what changes when the problem is no longer a toy, including what this toolkit does not do.
+
+## The path
+
+| | Sector | The question | Start from |
+| --- | --- | --- | --- |
+| 1 | [Chemistry](/docs/applications/chemistry) | What is the energy of a small molecule? | [Variational algorithms](/docs/algorithms/variational-algorithms) |
+| 2 | [Telecommunications](/docs/applications/telecommunications) | How do two parties send more information than the channel seems to hold? | [The Bell state](/docs/tutorials/bell-state-lesson) |
+| 3 | [Physics](/docs/applications/physics) | How does a spin, a clock, or an interferometer read a phase? | [Interference](/docs/tutorials/interference) |
+| 4 | [Cryptography](/docs/applications/cryptography) | How do two people share a secret that an eavesdropper disturbs? | [Superposition](/docs/tutorials/superposition) |
+| 5 | [Further sectors](/docs/applications/further) | Optimization, sensing, materials, and medicine | The four pages above |
+
+<Callout type="info">
+  The toys use the gates fqkit can draw: H, RX, RY, RZ, CNOT, CZ, SWAP, and Toffoli. A rotation by <Math tex="\pi" /> stands in for a bit flip or a phase flip. Qubit 0 is the top wire and the leftmost bit.
+</Callout>

@@ -1,0 +1,41 @@
+---
+title: Hardware
+description: Run an FQkit circuit on a real quantum computer, from the account to the returned counts.
+---
+
+# Hardware
+
+`run()` simulates a circuit on your computer. This section is the other path: send that same circuit to a real machine, watch the job in the queue, and read the measurements when the chip is done.
+
+You do this from your own Python. The lessons on this website stay on the simulator, so a hardware token never has to be pasted into a browser cell.
+
+## The path
+
+1. Install the extra for the company that owns the machine.
+2. Create an account with that company and save the credential on your computer.
+3. Build the circuit with `QuantumCircuit`, the same way you do for the simulator.
+4. `submit(qc, machine)` hands the circuit to that company's runtime.
+5. `job.status()` asks the queue. `job.counts()` waits, then returns the shots in FQkit order.
+
+## The machines
+
+| Name you pass | Company | How FQkit reaches it | Account |
+| --- | --- | --- | --- |
+| `"ibm"` | IBM Quantum | Qiskit Runtime | Free IBM Quantum account |
+| `"ionq"` | IonQ Forte-1 | Amazon Braket | AWS account with Braket enabled |
+| `"rigetti"` | Rigetti Ankaa-3 | Amazon Braket | AWS account with Braket enabled |
+| `"iqm"` | IQM Garnet | Amazon Braket | AWS account with Braket enabled |
+| `"aqt"` | AQT IBEX-Q1 | Amazon Braket | AWS account with Braket enabled |
+
+IBM jobs wait on the free plan's queue. Braket jobs are billed by AWS for each task. A different chip from the same company is selected later with `backend`.
+
+## Read it in order
+
+| | Page | What you do |
+| --- | --- | --- |
+| 1 | [Accounts](/docs/hardware/accounts) | Install the extra, create the account, save the token |
+| 2 | [Runtime](/docs/hardware/runtime) | What the vendor does with the circuit after you submit |
+| 3 | [Job submission](/docs/hardware/jobs) | `submit`, device choice, cancel, and reconnect |
+| 4 | [Results](/docs/hardware/results) | Status words, counts, bit order, and noise |
+
+The circuit still has to be legal FQkit: the gates are H, RX, RY, RZ, CNOT, CZ, SWAP, and Toffoli, and every `Parameter` is bound to a number before the job is sent. Export details live on [OpenQASM & Hardware](/docs/openqasm).

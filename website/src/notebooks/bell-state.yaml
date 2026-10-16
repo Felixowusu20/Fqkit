@@ -1,0 +1,26 @@
+title: Bell state
+description: Entangle two qubits with Python and check that the bits match.
+order: 3
+cells:
+  - kind: markdown
+    source: |
+      The Hadamard puts qubit 0 into superposition. The CNOT copies that bit onto qubit 1. You should only see 00 and 11.
+
+      - Change the CNOT targets to `[1, 0]` and run again.
+      - Add `qc.add_gate(Hadamard(), [1])` before the CNOT. Which bitstrings appear?
+  - kind: code
+    source: |
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, CNOT, run, measure_all
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      qc = QuantumCircuit(2)
+      qc.add_gate(Hadamard(), [0])
+      qc.add_gate(CNOT(), [0, 1])
+
+      state = run(qc)
+      show(qc)
+      plot(state)
+      print("State :", np.round(state, 4))
+      print("Counts:", measure_all(state, shots=1024))

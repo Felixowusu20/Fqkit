@@ -118,22 +118,28 @@ Two collections are configured in `keystatic.config.mjs`:
 Each entry has a title, description, and an MDX body. Saving writes the file to
 disk; commit and push to publish.
 
-### Letting scholars edit from anywhere (still free)
+### Editing on the deployed site
 
-Local mode (the default) only works on your own machine. To let scholars edit
-through a public URL, switch Keystatic to **GitHub mode** and deploy — all free:
+The admin at `/keystatic` on your computer writes files in this folder. The
+deployed site cannot do that: Vercel does not keep file edits. The deployed
+admin reads and saves through GitHub instead.
 
-1. **Deploy the site to Vercel** (Hobby tier, free) using the steps above.
-2. **Create a free GitHub OAuth app** (GitHub → Settings → Developer settings →
-   OAuth Apps). Set the callback URL to
-   `https://<your-site>.vercel.app/api/keystatic/github/oauth`. Note the client
-   ID and generate a client secret.
-3. **Set `storage: { kind: 'github', repo: 'Felixowusu20/Fqkit' }`** in
-   `keystatic.config.mjs`, and add the `KEYSTATIC_GITHUB_CLIENT_ID` /
-   `KEYSTATIC_GITHUB_CLIENT_SECRET` env vars in Vercel (free).
-4. **Add scholars as repository collaborators** (free for public repos). They
-   sign in at `/keystatic` with their GitHub account; edits become commits /
-   pull requests on the repo, which Vercel redeploys automatically.
+Connect it once, after this version is deployed:
+
+1. On your computer run `VERCEL=1 npm run dev` inside `website`, then open
+   `http://127.0.0.1:3000/keystatic`.
+2. Choose **Create GitHub App**, name it, and grant it access to `Fqkit`.
+   Keystatic writes `.env` with `KEYSTATIC_GITHUB_CLIENT_ID`,
+   `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET`, and
+   `NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`.
+3. In the Vercel project, add those four variables, then redeploy.
+4. In the GitHub app settings, add this callback URL:
+   `https://<your-site>.vercel.app/api/keystatic/github/oauth/callback`.
+
+After that, `/keystatic` on the live site lists the pages already in the
+repository. Saving a page commits it. The public site shows the page after
+Vercel finishes the new deploy. A normal `npm run dev` on your computer still
+writes files directly.
 
 No paid services, no database, no hosting fees.
 

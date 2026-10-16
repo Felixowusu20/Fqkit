@@ -1,0 +1,45 @@
+---
+title: Results
+description: Read a hardware job's status and counts, including bit order and noise.
+---
+
+# Results
+
+`status()` and `counts()` are the two reads. One returns immediately. The other waits for the chip.
+
+```python
+print(job.status())   # QUEUED, RUNNING, COMPLETED, CANCELLED, or FAILED
+print(job.counts())   # blocks until the shots are ready
+```
+
+`counts()` returns a dictionary of bitstring to count, the same shape as `measure_all`. For a two-qubit Bell circuit a noiseless simulator returns only `00` and `11`. A real device also returns some `01` and `10`. Those extra outcomes are noise. They mean the job ran on hardware.
+
+## Bit order
+
+FQkit writes qubit 0 on the left, so `10` means qubit 0 was measured 1 and qubit 1 was measured 0. IBM and Braket write qubit 0 on the right.
+
+`job.counts()` flips every bitstring before you see it. A vendor result of `01` with two qubits is returned as `10`. You can compare `job.counts()` with `measure_all(run(qc))` without reversing strings yourself.
+
+The width comes from the circuit on the job you just submitted. On a job opened with `get_job`, pass `num_qubits` so the flip uses the right width. If you leave it out, the width is taken from the bitstrings in the result.
+
+## Fields on the job
+
+| Field | Contents |
+| --- | --- |
+| `job.machine` | The name you passed, such as `"ibm"` or `"ionq"` |
+| `job.provider` | `"ibm"` or `"braket"` |
+| `job.backend` | The IBM device name, or the Braket device ARN |
+| `job.job_id` | The id to pass to `get_job` later |
+| `job.shots` | The shot count from `submit`, or `None` on a reconnected job |
+
+## When there is no count dictionary
+
+`counts()` raises `RuntimeError` if the vendor result has no measurement record. That can happen if the circuit was exported without measurements. `submit` always asks for a full measurement, so a job created by `submit` includes one.
+
+A failed job should be read with `status()` first. Calling `counts()` on a failed or cancelled job asks the vendor for a result and surfaces the vendor's error.
+
+## Where this stops
+
+This path runs in your own Python, with your IBM token or your AWS credentials. The practice lessons at [/notebooks](/notebooks) keep using the local simulator in the browser. An account on a company that FQkit does not list, such as Quantinuum, does not become a `submit` target by itself.
+
+To check the circuit before a hardware job, simulate it with [Simulation & Measurement](/docs/simulation-and-measurement). To see the text that is actually exported, use [OpenQASM & Hardware](/docs/openqasm).

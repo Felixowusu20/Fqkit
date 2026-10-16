@@ -1,0 +1,34 @@
+title: Cryptography
+description: Compare matching and mismatched bases for one BB84 qubit.
+order: 8
+cells:
+  - kind: markdown
+    source: |
+      When Alice and Bob use the same basis, Bob's bit is certain. When they differ, each outcome has probability 0.5, and that round cannot be kept as key.
+
+      Prepare Alice's X-basis bit 1 (`Hadamard` then `RZ(pi)`) and measure in X. Then measure the same preparation in Z.
+  - kind: code
+    source: |
+      import math
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, RX, RZ, run
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      def exchange(label, prep, bob_measures_x):
+          qc = QuantumCircuit(1)
+          for gate in prep:
+              qc.add_gate(gate, [0])
+          if bob_measures_x:
+              qc.add_gate(Hadamard(), [0])
+          state = run(qc)
+          print(label, np.round(np.abs(state) ** 2, 4))
+          return qc, state
+
+      exchange("Z 0, measure Z", [], False)
+      exchange("Z 1, measure Z", [RX(math.pi)], False)
+      exchange("X 0, measure X", [Hadamard()], True)
+      qc, state = exchange("X 1, measure X", [Hadamard(), RZ(math.pi)], True)
+      exchange("X 0, measure Z", [Hadamard()], False)
+      show(qc)
+      plot(state)

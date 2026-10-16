@@ -50,7 +50,7 @@ def test_all_gate_names_map():
     theta = Parameter("t")
     qc = QuantumCircuit(3)
     qc.add_gate(RX(theta), [0])
-    bind_parameters(qc, {"t": 0.5})
+    qc = bind_parameters(qc, {"t": 0.5})
     qc.add_gate(RY(0.25), [1])
     qc.add_gate(RZ(0.75), [2])
     qc.add_gate(Hadamard(), [0])
@@ -121,7 +121,7 @@ def test_roundtrip_parameterized():
     qc.add_gate(Hadamard(), [0])
     qc.add_gate(RX(theta), [1])
     qc.add_gate(RY(theta), [0])
-    bind_parameters(qc, {"theta": 1.234})
+    qc = bind_parameters(qc, {"theta": 1.234})
     _assert_matches_qiskit(qc)
 
 

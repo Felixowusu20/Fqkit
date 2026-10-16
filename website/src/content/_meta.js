@@ -5,8 +5,12 @@ export default {
   gates: 'Gates',
   circuits: 'Circuits',
   'simulation-and-measurement': 'Simulation & Measurement',
+  'simulator-correctness': 'Simulator correctness',
   parameters: 'Parameters & Binding',
   openqasm: 'OpenQASM & Hardware',
+  hardware: 'Hardware',
   api: 'API Reference',
-  tutorials: 'Tutorials'
+  tutorials: 'Tutorials',
+  algorithms: 'Algorithms',
+  applications: 'Applications'
 }

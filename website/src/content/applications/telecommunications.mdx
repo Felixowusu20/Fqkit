@@ -1,0 +1,78 @@
+---
+title: '2. Telecommunications'
+description: Send two classical bits by transmitting one qubit of a shared Bell pair, then see what a quantum network is asking for.
+---
+
+# 2. Telecommunications
+
+A communications engineer counts bits per transmission. Superdense coding, due to Bennett and Wiesner, changes that count: if two people already share an entangled pair, sending one qubit delivers two classical bits.
+
+## The question
+
+Alice has a two-bit message. She may send Bob only her half of a shared pair. Can Bob print the message?
+
+They start from the Bell state, the same circuit as the [Bell state lesson](/docs/tutorials/bell-state-lesson). Qubit 0 is Alice's, the top wire. Qubit 1 stays with Bob.
+
+Alice writes the message onto her qubit, then sends that qubit. Bob untangles the pair and measures both.
+
+| Message | Alice applies | Bob should read |
+| --- | --- | --- |
+| 00 | nothing | 00 |
+| 01 | <Math tex="\mathrm{RX}(\pi)" /> on qubit 0 | 01 |
+| 10 | <Math tex="\mathrm{RZ}(\pi)" /> on qubit 0 | 10 |
+| 11 | <Math tex="\mathrm{RX}(\pi)" /> then <Math tex="\mathrm{RZ}(\pi)" /> on qubit 0 | 11 |
+
+<Math tex="\mathrm{RX}(\pi)" /> flips the bit, up to a phase the final measurement does not show. <Math tex="\mathrm{RZ}(\pi)" /> flips the phase. Together they are the four messages.
+
+## The quantum idea
+
+The shared pair is a resource that was distributed earlier, the way a fiber route is installed before the traffic arrives. Alice's local gates choose which of the four Bell states the pair becomes. Bob's CNOT and Hadamard turn that choice back into an ordinary bitstring. One qubit moved. Two bits arrived.
+
+## A toy you can run
+
+The circuit below is message 10: phase flip, then Bob's decoding.
+
+<Circuit spec="H 0; CNOT 0 1; RZ pi 0; CNOT 0 1; H 0" caption="Message 10. Alice phases her qubit, then Bob decodes." />
+
+```python
+import math
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, RX, RZ, CNOT, run
+
+np.set_printoptions(precision=4, suppress=True)
+
+def send(message, ops):
+    qc = QuantumCircuit(2)
+    qc.add_gate(Hadamard(), [0])
+    qc.add_gate(CNOT(), [0, 1])
+    for gate in ops:
+        qc.add_gate(gate, [0])
+    qc.add_gate(CNOT(), [0, 1])
+    qc.add_gate(Hadamard(), [0])
+    probabilities = np.abs(run(qc)) ** 2
+    print(message, np.round(probabilities, 4))
+
+send("00", [])
+send("01", [RX(math.pi)])
+send("10", [RZ(math.pi)])
+send("11", [RX(math.pi), RZ(math.pi)])
+```
+
+```text
+00 [1. 0. 0. 0.]
+01 [0. 1. 0. 0.]
+10 [0. 0. 1. 0.]
+11 [0. 0. 0. 1.]
+```
+
+Each message lands on its own outcome, with probability 1. The left bit is qubit 0.
+
+## Follow up
+
+1. Open the [telecommunications notebook](/notebooks/telecommunications) and delete Bob's Hadamard. Which messages still come out cleanly?
+2. Swap the order of Alice's two gates on message 11. The table above claims the outcome stays 11. Check it.
+3. The pair has to be shared before the message. [The Bell state](/docs/tutorials/bell-state-lesson) is that setup, and the [GHZ state](/docs/tutorials/ghz-state) is the three-party version of the same idea.
+
+## The real scale
+
+A quantum network is the job of distributing those pairs across a city or between cities, then using them for this protocol or for the key exchange on the [cryptography](/docs/applications/cryptography) page. Repeaters, loss in the fiber, and the rate of pairs per second are the engineering problems. The circuit on this page is the payload, not the cable.

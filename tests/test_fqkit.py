@@ -131,8 +131,8 @@ def test_parameter_binding_rx():
     theta = Parameter("theta")
     qc = QuantumCircuit(1)
     qc.add_gate(RX(theta), [0])
-    bind_parameters(qc, {"theta": np.pi})
-    assert np.allclose(probs(run(qc)), [0, 1])   # RX(pi)|0> = -i|1>
+    bound = bind_parameters(qc, {"theta": np.pi})
+    assert np.allclose(probs(run(bound)), [0, 1])   # RX(pi)|0> = -i|1>
 
 
 def test_unbound_parameter_raises_clear_error():
@@ -149,7 +149,7 @@ def test_measure_all_bell_distribution():
     qc = QuantumCircuit(2)
     qc.add_gate(Hadamard(), [0])
     qc.add_gate(CNOT(), [0, 1])
-    counts = measure_all(run(qc), shots=4000)
+    counts = measure_all(run(qc), shots=4000, seed=0)
     assert set(counts) == {"00", "11"}
     assert sum(counts.values()) == 4000
     assert 1700 < counts["00"] < 2300   # roughly 50/50

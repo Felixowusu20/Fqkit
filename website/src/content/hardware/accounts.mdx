@@ -1,0 +1,63 @@
+---
+title: Accounts
+description: Install the hardware extra and save an IBM or Amazon Braket credential.
+---
+
+# Accounts
+
+FQkit does not create the hardware account. You create it with the company, then tell your own Python how to sign in. After that, `submit` can use the account.
+
+<Callout type="info">
+  Keep the token on your computer. The lesson notebooks on this website run in the browser and do not use these accounts.
+</Callout>
+
+## Install the extra
+
+The normal install is only FQkit and NumPy. Add a vendor SDK when you are ready to submit:
+
+```bash
+pip install "fqkit[ibm]"       # IBM Quantum, through Qiskit Runtime
+pip install "fqkit[braket]"    # IonQ, Rigetti, IQM, and AQT, through Amazon Braket
+pip install "fqkit[hardware]"  # both
+```
+
+## IBM Quantum
+
+1. Create a free account at [quantum.cloud.ibm.com](https://quantum.cloud.ibm.com).
+2. Copy the API token from the account page.
+3. Save it once in Python:
+
+```python
+from qiskit_ibm_runtime import QiskitRuntimeService
+
+QiskitRuntimeService.save_account(channel="ibm_quantum", token="YOUR_TOKEN")
+```
+
+Replace `YOUR_TOKEN` with the token from the account page. You can also pass `token=` on each `submit` call and skip `save_account`.
+
+Check that FQkit can see the SDK:
+
+```python
+from fqkit.hardware import providers
+
+for row in providers():
+    print(row["name"], row["installed"], row["install"])
+```
+
+`"ibm"` should report `installed` as true. The other names stay false until the Braket extra is installed. `providers()` does not contact IBM. It only checks that the SDK is importable.
+
+## Amazon Braket
+
+IonQ, Rigetti, IQM, and AQT are reached through one AWS account:
+
+1. Create an AWS account and turn on Amazon Braket in the console.
+2. Configure credentials on your computer, for example with `aws configure`.
+3. Install `fqkit[braket]`.
+
+`submit(qc, "ionq")` then uses those credentials. The same account covers `"rigetti"`, `"iqm"`, and `"aqt"`. Each QPU task is billed. Braket stores the task result in its default bucket, so you can omit a bucket name. Pass `s3_location=("your-bucket", "prefix")` when you want a bucket of your own.
+
+## A machine with no SDK
+
+If you call `submit` before the extra is installed, FQkit raises `ProviderNotInstalled` and prints the install line, for example `pip install "fqkit[ibm]"`. Nothing is sent.
+
+Next: [Runtime](/docs/hardware/runtime) explains what that account does with the circuit.

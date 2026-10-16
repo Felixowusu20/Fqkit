@@ -1,0 +1,41 @@
+name: Bug report
+description: Report incorrect simulator results, crashes, or API problems.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For planned simulator work, prefer the **Simulator task** template and
+        [docs/simulator-tasks.md](https://github.com/Felixowusu20/Fqkit/blob/main/docs/simulator-tasks.md).
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Actual vs expected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduce
+      description: Smallest Python snippet that shows the bug.
+      render: python
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: FQkit version / commit
+      placeholder: e.g. 0.1.3 or commit SHA
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Python version, OS, NumPy version

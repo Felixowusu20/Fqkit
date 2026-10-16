@@ -1,0 +1,78 @@
+---
+title: 4. The GHZ state
+description: Build a three-qubit GHZ state and see that all three bits agree on every shot.
+---
+# 4. The GHZ state
+
+The Bell state correlates two qubits. The **GHZ state** correlates three: one
+Hadamard and two CNOTs produce a state that is only ever measured as `000` or
+`111`.
+
+## 1. The idea
+
+Copy the superposition on qubit 0 onto qubit 1, then onto qubit 2. Each CNOT
+flips its target only in the branch where the control is `1`, so the three
+bits stay equal.
+
+<Circuit spec="H 0; CNOT 0 1; CNOT 0 2" caption="GHZ state. One Hadamard and two CNOTs." />
+
+## 2. The code
+
+```python
+import numpy as np
+from fqkit import QuantumCircuit, Hadamard, CNOT, run, measure_all
+
+np.set_printoptions(precision=4, suppress=True)
+
+qc = QuantumCircuit(3)
+qc.add_gate(Hadamard(), [0])
+qc.add_gate(CNOT(), [0, 1])
+qc.add_gate(CNOT(), [0, 2])
+
+state = run(qc)
+print("Probabilities:", np.round(np.abs(state) ** 2, 4))
+print("Counts       :", measure_all(state, shots=1024))
+```
+
+## 3. The output
+
+```text
+Probabilities: [0.5 0.  0.  0.  0.  0.  0.  0.5]
+Counts       : {'000': 499, '111': 525}
+```
+
+Eight amplitudes, two of them nonzero. They are the first entry (`000`) and
+the last (`111`). The counts move around 512 / 512; the zeros do not.
+
+## 4. The explanation
+
+* Hadamard on qubit 0 creates the branches `000` and `100`.
+* CNOT from 0 to 1 turns `100` into `110`.
+* CNOT from 0 to 2 turns `110` into `111`.
+* The `000` branch is never flipped. No amplitude is left on `001`, `010`,
+  `011`, `100`, `101`, or `110`.
+* Any one qubit, looked at alone, is random. Any two already determine the
+  third.
+
+## 5. The math
+
+<Equation tex="|\mathrm{GHZ}\rangle = \frac{|000\rangle + |111\rangle}{\sqrt{2}}" />
+
+In fqkit's big endian order the vector has length 8:
+
+<Equation tex="\frac{1}{\sqrt{2}}\begin{pmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{pmatrix}" />
+
+<Callout type="default">
+  **Key insight:** adding a qubit did not add a new independent coin. Both
+  CNOTs copy the same superposition, so the only surviving outcomes are the
+  two in which every bit agrees.
+</Callout>
+
+## Try it yourself
+
+* Drop the second ***CNOT***. Which two bitstrings remain, and which qubit is now
+  independent?
+* Change the second **CNOT** to `[1, 2]`. Is the final state the same GHZ state?
+* The algorithms that use these states are in
+  [Algorithms](/docs/algorithms), starting with
+  [Deutsch's algorithm](/docs/algorithms/deutsch).

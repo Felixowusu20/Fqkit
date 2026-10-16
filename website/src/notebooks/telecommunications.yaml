@@ -1,0 +1,36 @@
+title: Telecommunications
+description: Send two classical bits by transmitting one qubit of a shared pair.
+order: 6
+cells:
+  - kind: markdown
+    source: |
+      Alice and Bob share a Bell pair. Alice writes a two-bit message on qubit 0. Bob decodes. Each message should land on its own outcome.
+
+      - Delete Bob's final Hadamard and run again. Which messages are still certain?
+      - Swap the order of the two gates on message 11.
+  - kind: code
+    source: |
+      import math
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, RX, RZ, CNOT, run
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      def send(message, ops):
+          qc = QuantumCircuit(2)
+          qc.add_gate(Hadamard(), [0])
+          qc.add_gate(CNOT(), [0, 1])
+          for gate in ops:
+              qc.add_gate(gate, [0])
+          qc.add_gate(CNOT(), [0, 1])
+          qc.add_gate(Hadamard(), [0])
+          state = run(qc)
+          print(message, np.round(np.abs(state) ** 2, 4))
+          return qc, state
+
+      send("00", [])
+      send("01", [RX(math.pi)])
+      send("10", [RZ(math.pi)])
+      qc, state = send("11", [RX(math.pi), RZ(math.pi)])
+      show(qc)
+      plot(state)

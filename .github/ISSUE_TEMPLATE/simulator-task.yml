@@ -1,0 +1,87 @@
+name: Simulator task
+description: Claim or propose work from the classical simulator roadmap.
+title: "[Simulator] "
+labels: ["simulator", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read **[docs/simulator-tasks.md](https://github.com/Felixowusu20/Fqkit/blob/main/docs/simulator-tasks.md)** before filing.
+        Prefer Tasks 1 → 2 → 3 before advanced noise or benchmarks.
+
+  - type: dropdown
+    id: task_id
+    attributes:
+      label: Task
+      description: Which roadmap item are you claiming or proposing?
+      options:
+        - "1 — Finish statevector validation"
+        - "2 — Measurement v2 (seeds, Result)"
+        - "3 — Pauli observables and expectation values"
+        - "4 — Local circuit equivalence tests"
+        - "5 — Density-matrix simulator and simple noise"
+        - "6 — Performance and memory benchmarks"
+        - "A — Missing gates (I, X, Y, Z, S, T)"
+        - "B — probabilities(state) helper"
+        - "C — Immutable parameter binding"
+        - "D — Single-qubit / partial Z-measurement"
+        - "E — Simulator correctness docs page"
+        - "Other (describe below)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: intent
+    attributes:
+      label: Intent
+      options:
+        - I want to claim this task and open a PR
+        - I am reporting that this task is still needed
+        - I am proposing a scoped change related to this task
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What will you deliver?
+      description: 2–5 sentences. Link to the task section in docs/simulator-tasks.md.
+      placeholder: e.g. Add seeded measure_all + Result dataclass; keep dict-compatible counts; tests for Bell reproducibility.
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: How will you go about it?
+      description: Files you expect to touch and main design choices.
+      placeholder: e.g. fqkit/core/measurement.py, tests/test_fqkit.py; use np.random.default_rng(seed).
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria checklist
+      description: Copy from the task doc and check what you own.
+      value: |
+        - [ ] Matches the criteria in docs/simulator-tasks.md for this task
+        - [ ] pytest passes
+        - [ ] Docs or example updated if user-facing
+        - [ ] Seeds / tolerances documented if relevant
+    validations:
+      required: true
+
+  - type: textarea
+    id: help
+    attributes:
+      label: Why this helps the library
+      description: One short paragraph for reviewers and other contributors.
+    validations:
+      required: true
+
+  - type: input
+    id: related
+    attributes:
+      label: Related issues or PRs
+      description: Optional links (e.g. #12, depends on Task 1).

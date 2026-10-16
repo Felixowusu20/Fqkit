@@ -1,0 +1,39 @@
+title: Grover search
+description: Mark 11 and collect the probability there in one iteration.
+order: 4
+cells:
+  - kind: markdown
+    source: |
+      This is one Grover iteration on two qubits. The first CZ marks 11. Every shot should read 11.
+
+      - Delete the first `qc.add_gate(CZ(), [0, 1])` and run again.
+      - Paste the oracle and the diffusion a second time. Is 11 still certain?
+  - kind: code
+    source: |
+      import math
+      import numpy as np
+      from fqkit import QuantumCircuit, Hadamard, CZ, RX, run, measure_all
+
+      np.set_printoptions(precision=4, suppress=True)
+
+      qc = QuantumCircuit(2)
+      for q in (0, 1):
+          qc.add_gate(Hadamard(), [q])
+
+      qc.add_gate(CZ(), [0, 1])
+
+      for q in (0, 1):
+          qc.add_gate(Hadamard(), [q])
+      for q in (0, 1):
+          qc.add_gate(RX(math.pi), [q])
+      qc.add_gate(CZ(), [0, 1])
+      for q in (0, 1):
+          qc.add_gate(RX(math.pi), [q])
+      for q in (0, 1):
+          qc.add_gate(Hadamard(), [q])
+
+      state = run(qc)
+      show(qc)
+      plot(state)
+      print("Probabilities:", np.round(np.abs(state) ** 2, 4))
+      print("Counts       :", measure_all(state, shots=1024))
