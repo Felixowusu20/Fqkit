@@ -25,7 +25,8 @@
 
 FQkit is a Python package for building and simulating quantum circuits. The
 library is written in Python. NumPy does the arithmetic, and Matplotlib draws
-the circuits and the probability graphs.
+the circuits and the probability graphs. Optional chemistry extras add molecular
+VQE and one-shot DMET Embedded-VQE on the same FQkit engine.
 
 Authors: Felix Owusu and Dr. Addo Dorcas Attuabea.
 
@@ -33,14 +34,29 @@ Website: <https://fqkit.vercel.app/>
 
 ## Features
 
-- Qubits and parameterized gates (`H`, `RX`, `RY`, `RZ`)
+- Qubits and parameterized gates (`H`, `RX`, `RY`, `RZ`, …)
 - Multi-qubit gates: `CNOT`, `CZ`, `SWAP`, `Toffoli`
 - Circuit construction with `QuantumCircuit`
-- Parameter binding for variational circuits
-- A statevector simulator that returns the final state
-- Measurement with shot-based sampling
-- `draw` and `plot` for circuit pictures and probability graphs
-- Export to OpenQASM 2.0: run your circuits on real IBM hardware via Qiskit
+- Immutable `bind_parameters` for variational circuits (VQE / QAOA)
+- Dense statevector simulator with seeded measurement / probability tables
+- Pauli strings, Hamiltonians, and exact ⟨O⟩ expectations
+- Circuit equivalence checks and density-matrix Kraus noise
+- `draw` and `plot` for circuits and probability graphs
+- Export to OpenQASM 2.0 / 3; submit via `fqkit.hardware` (IBM, Braket)
+- **VQE** (`fqkit[chemistry]`): PySCF + OpenFermion → FQkit ansatz / SciPy loop
+- **Embedded-VQE**: one-shot DMET fragment ⊕ bath impurity on FQkit
+
+## Progress
+
+Tracked improvements (newest first). Use this as the README changelog.
+
+| Version / date | What landed |
+|---|---|
+| **0.1.3+ (2026-10)** | Molecular **VQE** and one-shot **DMET Embedded-VQE**: PySCF/OpenFermion mapping, HEA + SciPy on FQkit; H₂ ↔ FCI and LiH impurity ↔ CASCI validated |
+| 0.1.3 | Simulator correctness push: Pauli expectations, equivalence, density noise, immutable bind, partial measure/collapse, probability tables, benchmarks, docs site |
+| earlier | Core circuits, statevector engine, OpenQASM export, IBM / Braket hardware extras, learning website |
+
+Roadmap next: DMET correlation-potential self-consistency / multi-fragment μ fitting; richer chemistry ansatze; shot-based VQE on `fqkit.hardware`.
 
 ## Installation
 
@@ -52,12 +68,22 @@ fqkit
 FQkit needs Python 3.9 or newer. NumPy and Matplotlib are installed with it.
 The `fqkit` command prints the mark above, with the authors' first names underneath.
 
+Optional stacks:
+
+```bash
+pip install "fqkit[chemistry]"   # PySCF + OpenFermion + SciPy → VQE / Embedded-VQE
+pip install "fqkit[ibm]"         # IBM Quantum via Qiskit Runtime
+pip install "fqkit[braket]"      # IonQ, Rigetti, IQM, AQT via Amazon Braket
+pip install "fqkit[hardware]"    # ibm + braket
+pip install "fqkit[dev]"         # pytest (+ scipy for local VQE unit tests)
+```
+
 To work on the source, clone the repository and install it in editable mode:
 
 ```bash
 git clone https://github.com/Felixowusu20/Fqkit.git
 cd Fqkit
-pip install -e ".[dev]"
+pip install -e ".[dev,chemistry]"
 pytest
 ```
 
@@ -212,23 +238,47 @@ fqkit/
     circuit.py            # QuantumCircuit: an ordered list of operations
     parameter_binding.py  # bind_parameters: substitute symbols -> numbers
     simulator.py          # run: apply gates to a statevector
-    measurement.py        # measure_all: sample |amplitude|^2
-    qasm.py               # to_qasm: export circuits to OpenQASM 2.0
+    measurement.py        # measure_all / collapse / probability tables
+    observables.py        # Pauli, Hamiltonian, expectation
+    equivalence.py        # circuits_equivalent
+    density.py            # density-matrix + Kraus noise
+    draw.py               # draw / plot
+    qasm.py               # to_qasm: OpenQASM 2.0
+  vqe/                    # optional: pip install fqkit[chemistry]
+    molecule.py           # PySCF + OpenFermion → FQkit Hamiltonian
+    ansatz.py             # hardware-efficient ansatz
+    optimize.py           # run_vqe (SciPy + FQkit ⟨H⟩)
+    dmet.py               # one-shot DMET fragment ⊕ bath
+    embedded.py           # run_embedded_vqe
   hardware/
     ibm.py                # IBM Quantum via Qiskit Runtime
     braket.py             # IonQ, Rigetti, IQM, AQT via Amazon Braket
+examples/
+  vqe_h2.py               # full-molecule H₂ VQE
+  embedded_vqe_lih.py     # DMET Embedded-VQE on LiH
 ```
 
 ## Convention
 
 FQkit uses **big-endian** qubit ordering: qubit 0 is the most significant bit
 of the state-vector index, and the first qubit passed to a multi-qubit gate is
-its most significant qubit (for `CNOT`, the control).
+its most significant qubit (for `CNOT`, the control). OpenFermion JW terms are
+mapped so qubit 0 is the **leftmost** Pauli letter, matching this convention.
 
-## VQE (chemistry extras)
+## VQE and Embedded-VQE (chemistry extras)
 
-Molecular VQE uses **PySCF + OpenFermion** for the Hamiltonian and **FQkit only**
-for the ansatz / ⟨H⟩ loop (no PennyLane or Qiskit Nature):
+Stack choice (kept deliberately lean):
+
+| Layer | Tool |
+|---|---|
+| Chemistry | PySCF (+ NumPy / SciPy) |
+| Mapping | OpenFermion + openfermionpyscf (Jordan–Wigner) |
+| Quantum app | **FQkit only** — ansatz, `bind_parameters`, ⟨H⟩, VQE loop |
+| Hardware later | `fqkit.hardware` (same circuits → OpenQASM → IBM / Braket) |
+
+No PennyLane or Qiskit Nature on the chemistry path.
+
+### Full-molecule VQE
 
 ```bash
 pip install -e ".[chemistry]"
@@ -236,18 +286,28 @@ PYTHONPATH=. python examples/vqe_h2.py
 ```
 
 ```python
-from fqkit.vqe import molecule_hamiltonian, run_vqe, run_embedded_vqe
+from fqkit.vqe import molecule_hamiltonian, run_vqe
 
 H, info = molecule_hamiltonian(
     [("H", (0, 0, 0)), ("H", (0, 0, 0.7414))],
     basis="sto-3g",
 )
-result = run_vqe(H)
-print(result.energy, info.fci_energy)
+result = run_vqe(H, layers=3, maxiter=400, seed=0)
+print(result.energy, info.hf_energy, info.fci_energy)
 ```
 
-One-shot **DMET Embedded-VQE** (fragment ⊕ bath impurity, PySCF `dmet_cas`,
-FQkit VQE solver):
+Works for any geometry PySCF accepts. Practical limit is statevector size
+(~2 × number of spatial orbitals qubits). H₂ / STO-3G is 4 qubits; larger
+molecules should use embedding.
+
+**Checks:** mapped `H` spectrum matches FCI; VQE on H₂ lands near FCI with the
+default HEA + COBYLA settings used in the example.
+
+### One-shot DMET Embedded-VQE
+
+For correlated / larger systems: pick a fragment, build bath orbitals from the
+HF 1-RDM (`pyscf.mcscf.dmet_cas`), form the interacting-bath impurity
+Hamiltonian, then run the same FQkit VQE loop.
 
 ```python
 from fqkit.vqe import run_embedded_vqe
@@ -255,16 +315,23 @@ from fqkit.vqe import run_embedded_vqe
 out = run_embedded_vqe(
     [("Li", (0, 0, 0)), ("H", (0, 0, 1.6))],
     fragment_atoms="H",
+    run_casci=True,
     run_fci=True,
 )
-print(out.energy, out.embedding.casci_energy, out.embedding.fci_energy)
+emb = out.embedding
+print(out.energy, emb.casci_energy, emb.fci_energy, emb.n_cas, emb.n_bath)
 ```
 
 ```bash
 PYTHONPATH=. python examples/embedded_vqe_lih.py
 ```
 
-IBM / Braket stay on `fqkit.hardware` when you move from the simulator to devices.
+**Checks:** qubit `H` ground energy = PySCF CASCI (machine precision); H₂ with a
+one-atom fragment recovers full FCI; LiH H-fragment impurity beats HF and sits
+near FCI; bath size ≤ fragment size (DMET bound).
+
+Still **one-shot** DMET (no correlation-potential self-consistency yet — see
+Progress / roadmap above).
 
 ## Benchmarks
 
@@ -285,21 +352,25 @@ GitHub issue template to claim work.
 
 ## Testing
 
-FQkit ships with a `pytest` suite covering the simulator, every gate, parameter
-binding, measurement, input validation, and the OpenQASM export, including
-round-trip tests that load an exported circuit into Qiskit and check that the
-statevectors match fqkit's own simulator.
-
 ```bash
-pip install -e ".[dev]"   # installs pytest
-pytest -v                 # 46 tests
+pip install -e ".[dev,chemistry]"
+pytest -v                 # 150+ tests when chemistry extras are present
+pytest -m "not chemistry" # skip PySCF / OpenFermion cases
 ```
 
-The Qiskit round-trip tests are skipped automatically if Qiskit is not
-installed. Install it (free) with `pip install qiskit` to run those too.
+Qiskit / hardware round-trips skip automatically if those SDKs are missing.
+Chemistry-marked tests skip if `fqkit[chemistry]` is not installed.
 
 | Test file | Covers |
 |---|---|
-| `tests/test_fqkit.py` | Single- and multi-qubit gates, entanglement (Bell states), reversed and non-adjacent controls, parameter binding, unbound-parameter errors, measurement statistics, and input validation |
-| `tests/test_qasm.py` | OpenQASM string output, gate-name mapping, error handling, and Qiskit round-trip equivalence |
-| `tests/test_hardware.py` | Machine selection, OpenQASM 3 for Braket, Runtime and Braket submission with stand-in SDKs, job status, and bit order |
+| `tests/test_fqkit.py` | Gates, entanglement, parameter binding, measurement, validation |
+| `tests/test_statevector_validation.py` | Analytical statevector / norm / unitary checks |
+| `tests/test_observables.py` | Pauli / Hamiltonian expectations |
+| `tests/test_equivalence.py` | Circuit equivalence |
+| `tests/test_density.py` | Density matrix + Kraus noise |
+| `tests/test_measurement.py` | Shots, seeds, probability tables, collapse |
+| `tests/test_bind_parameters.py` | Immutable bind |
+| `tests/test_qasm.py` | OpenQASM export + Qiskit round-trip |
+| `tests/test_hardware.py` | IBM / Braket submit path (stand-in SDKs) |
+| `tests/test_vqe.py` | `run_vqe`, H₂ mapping ↔ FCI |
+| `tests/test_embedded_vqe.py` | DMET impurity ↔ CASCI / FCI, bath bounds, LiH VQE |
