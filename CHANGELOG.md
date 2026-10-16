@@ -4,6 +4,17 @@ All notable changes to FQkit are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-16
+
+### Added
+- **Molecular VQE** (`fqkit.vqe`): PySCF + OpenFermion Jordan–Wigner → FQkit
+  Hamiltonian, hardware-efficient ansatz, and SciPy COBYLA loop on the
+  statevector engine. Install with `pip install "fqkit[chemistry]"`.
+- **One-shot DMET Embedded-VQE**: fragment ⊕ bath impurity via
+  `pyscf.mcscf.dmet_cas`, then the same FQkit VQE solver. Validated against
+  CASCI / FCI (H₂, LiH).
+- Examples: `examples/vqe_h2.py`, `examples/embedded_vqe_lih.py`.
+
 ## [0.1.3] - 2026-10-06
 
 ### Added

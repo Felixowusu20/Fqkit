@@ -52,7 +52,7 @@ Tracked improvements (newest first). Use this as the README changelog.
 
 | Version / date | What landed |
 |---|---|
-| **0.1.3+ (2026-10)** | Molecular **VQE** and one-shot **DMET Embedded-VQE**: PySCF/OpenFermion mapping, HEA + SciPy on FQkit; H₂ ↔ FCI and LiH impurity ↔ CASCI validated |
+| **0.1.4 (2026-10)** | Molecular **VQE** and one-shot **DMET Embedded-VQE**: PySCF/OpenFermion mapping, HEA + SciPy on FQkit; H₂ ↔ FCI and LiH impurity ↔ CASCI validated; `pip install "fqkit[chemistry]"` |
 | 0.1.3 | Simulator correctness push: Pauli expectations, equivalence, density noise, immutable bind, partial measure/collapse, probability tables, benchmarks, docs site |
 | earlier | Core circuits, statevector engine, OpenQASM export, IBM / Braket hardware extras, learning website |
 
