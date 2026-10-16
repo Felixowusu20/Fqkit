@@ -225,6 +225,47 @@ FQkit uses **big-endian** qubit ordering: qubit 0 is the most significant bit
 of the state-vector index, and the first qubit passed to a multi-qubit gate is
 its most significant qubit (for `CNOT`, the control).
 
+## VQE (chemistry extras)
+
+Molecular VQE uses **PySCF + OpenFermion** for the Hamiltonian and **FQkit only**
+for the ansatz / ⟨H⟩ loop (no PennyLane or Qiskit Nature):
+
+```bash
+pip install -e ".[chemistry]"
+PYTHONPATH=. python examples/vqe_h2.py
+```
+
+```python
+from fqkit.vqe import molecule_hamiltonian, run_vqe, run_embedded_vqe
+
+H, info = molecule_hamiltonian(
+    [("H", (0, 0, 0)), ("H", (0, 0, 0.7414))],
+    basis="sto-3g",
+)
+result = run_vqe(H)
+print(result.energy, info.fci_energy)
+```
+
+One-shot **DMET Embedded-VQE** (fragment ⊕ bath impurity, PySCF `dmet_cas`,
+FQkit VQE solver):
+
+```python
+from fqkit.vqe import run_embedded_vqe
+
+out = run_embedded_vqe(
+    [("Li", (0, 0, 0)), ("H", (0, 0, 1.6))],
+    fragment_atoms="H",
+    run_fci=True,
+)
+print(out.energy, out.embedding.casci_energy, out.embedding.fci_energy)
+```
+
+```bash
+PYTHONPATH=. python examples/embedded_vqe_lih.py
+```
+
+IBM / Braket stay on `fqkit.hardware` when you move from the simulator to devices.
+
 ## Benchmarks
 
 See how far the engines go on your laptop (specs table + timing/memory tables):

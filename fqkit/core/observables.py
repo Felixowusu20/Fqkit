@@ -308,19 +308,22 @@ def _pauli_expectation_density(rho: np.ndarray, p: Pauli) -> complex:
 
 
 def _is_term_list(value) -> bool:
-    if isinstance(value, (str, Pauli, Hamiltonian)):
+    """True if ``value`` is a sequence of terms, not a single (label, coeff) pair."""
+    if isinstance(value, (str, bytes, Pauli, Hamiltonian)):
         return False
-    if isinstance(value, (tuple, list)) and value and _looks_like_term(value[0]):
-        # Ambiguous: Hamiltonian(("ZZ", 1.0)) vs Hamiltonian([("ZZ", 1.0)])
-        # A single term pair is (label, coeff); a list of terms is iterable of pairs.
-        if (
-            len(value) == 2
-            and not isinstance(value[0], (tuple, list))
-            and isinstance(value[1], (int, float, complex, np.number))
-        ):
+    if not isinstance(value, (list, tuple)):
+        # e.g. generator of terms
+        return isinstance(value, Iterable)
+    if not value:
+        return False
+    # Single term pair: ("Z", 1.0) or (Pauli, coeff)
+    if len(value) == 2 and isinstance(value[1], (int, float, complex, np.number)):
+        first = value[0]
+        if isinstance(first, (str, Pauli)):
             return False
-        return True
-    return isinstance(value, Iterable)
+        if isinstance(first, (list, tuple)):
+            return True  # list of pairs starts with a pair
+    return _looks_like_term(value[0])
 
 
 def _looks_like_term(item) -> bool:
